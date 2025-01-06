@@ -1,0 +1,65 @@
+{
+  "name": "cloudcost",
+  "version": "0.1.0",
+  "description": "Multi-cloud cost intelligence for OCI and AWS: CLI + HTTP API with JSON/CSV/XLSX/ZIP exports, scheduled email reports, and a reusable library API.",
+  "keywords": [
+    "cost",
+    "finops",
+    "oci",
+    "oracle-cloud",
+    "aws",
+    "cost-explorer",
+    "cli",
+    "api",
+    "report",
+    "spreadsheet"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "cloudcost": "./src/cli.ts"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "cli": "node src/cli.ts",
+    "serve": "node src/interfaces/http/server.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cost-explorer": "^3.1148.0",
+    "commander": "^15.0.0",
+    "csv-stringify": "^6.9.0",
+    "dotenv": "^18.0.6",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "jszip": "^3.10.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.16",
+    "oci-common": "^2.142.2",
+    "oci-usageapi": "^2.142.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.10.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^6.4.17",
+    "vitest": "^5.0.3"
+  }
+}
