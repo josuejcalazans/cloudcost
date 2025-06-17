@@ -6,6 +6,6 @@ export interface SchedulerPort {
   schedule(
     expression: string,
     timezone: string,
-    task: () => void,
+    task: () => void | Promise<void>,
   ): ScheduledTask;
 }
