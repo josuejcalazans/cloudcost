@@ -7,10 +7,13 @@ import { InvalidAmountError, MoneyCurrencyMismatchError } from '../errors.ts';
  * Complexity: O(1) for every operation.
  */
 export class Money {
-  private constructor(
-    readonly minor: number,
-    readonly currency: string,
-  ) {}
+  readonly minor: number;
+  readonly currency: string;
+
+  private constructor(minor: number, currency: string) {
+    this.minor = minor;
+    this.currency = currency;
+  }
 
   static fromAmount(amount: number, currency = 'USD'): Money {
     if (!Number.isFinite(amount)) {

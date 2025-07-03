@@ -20,11 +20,13 @@ import type {
 
 export class FakeProvider implements CostProvider {
   readonly calls: CostQuery[] = [];
+  readonly id: ProviderId;
+  private readonly records: CostRecord[];
 
-  constructor(
-    readonly id: ProviderId,
-    private readonly records: CostRecord[],
-  ) {}
+  constructor(id: ProviderId, records: CostRecord[]) {
+    this.id = id;
+    this.records = records;
+  }
 
   async fetch(query: CostQuery): Promise<CostRecord[]> {
     this.calls.push(query);
@@ -46,12 +48,19 @@ export class MemoryCache implements CachePort {
 
 export class FakeExporter implements ReportExporter {
   readonly exported: CostReport[] = [];
+  readonly format: ReportExporter['format'];
+  readonly mimeType: string;
+  readonly extension: string;
 
   constructor(
-    readonly format: ReportExporter['format'],
-    readonly mimeType = 'application/octet-stream',
-    readonly extension = format,
-  ) {}
+    format: ReportExporter['format'],
+    mimeType = 'application/octet-stream',
+    extension = format,
+  ) {
+    this.format = format;
+    this.mimeType = mimeType;
+    this.extension = extension;
+  }
 
   async export(report: CostReport): Promise<Buffer> {
     this.exported.push(report);

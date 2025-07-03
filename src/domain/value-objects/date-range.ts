@@ -24,10 +24,13 @@ function normalizeIsoDate(value: string): string {
  * fixed-length ISO dates).
  */
 export class DateRange {
-  private constructor(
-    readonly from: string,
-    readonly to: string,
-  ) {}
+  readonly from: string;
+  readonly to: string;
+
+  private constructor(from: string, to: string) {
+    this.from = from;
+    this.to = to;
+  }
 
   static of(from: string, to: string): DateRange {
     const start = normalizeIsoDate(from);
