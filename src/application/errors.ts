@@ -26,3 +26,5 @@ export class MissingRecipientsError extends ApplicationError {
     );
   }
 }
+
+export class InvalidQueryError extends ApplicationError {}
