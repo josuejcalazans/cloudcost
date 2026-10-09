@@ -4,6 +4,7 @@ import type {
 } from '../../application/ports/exporter.ts';
 import { CsvExporter } from './csv-exporter.ts';
 import { JsonExporter } from './json-exporter.ts';
+import { PdfExporter } from './pdf-exporter.ts';
 import { XlsxExporter } from './xlsx-exporter.ts';
 import { ZipExporter } from './zip-exporter.ts';
 
@@ -11,6 +12,7 @@ export function createDefaultExporters(): Map<ReportFormat, ReportExporter> {
   const json = new JsonExporter();
   const csv = new CsvExporter();
   const xlsx = new XlsxExporter();
+  const pdf = new PdfExporter();
   const zip = new ZipExporter(json, csv, xlsx);
 
   const exporters = new Map<ReportFormat, ReportExporter>();
@@ -18,5 +20,6 @@ export function createDefaultExporters(): Map<ReportFormat, ReportExporter> {
   exporters.set('csv', csv);
   exporters.set('xlsx', xlsx);
   exporters.set('zip', zip);
+  exporters.set('pdf', pdf);
   return exporters;
 }

@@ -14,7 +14,7 @@ export class ProviderNotConfiguredError extends ApplicationError {
 export class UnsupportedFormatError extends ApplicationError {
   constructor(format: string) {
     super(
-      `unsupported report format "${format}" (expected one of: json, csv, xlsx, zip)`,
+      `unsupported report format "${format}" (expected one of: json, csv, xlsx, zip, pdf)`,
     );
   }
 }

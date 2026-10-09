@@ -4,8 +4,16 @@ import { DateRange } from '../../src/domain/value-objects/date-range.ts';
 import { PdfExporter } from '../../src/infrastructure/exporters/pdf-exporter.ts';
 import { record } from '../helpers/records.ts';
 
-function hex(text: string): string {
-  return Buffer.from(text, 'latin1').toString('hex');
+/**
+ * pdfkit splits a single text() call into several hex runs (e.g. "Object
+ * Stor" + "age"), so assertions must join every hex run in stream order.
+ */
+function pdfText(buffer: Buffer): string {
+  const runs = buffer.toString('latin1').match(/<[0-9a-f]+>/g) ?? [];
+  return Buffer.from(
+    runs.map((run) => run.slice(1, -1)).join(''),
+    'hex',
+  ).toString('latin1');
 }
 
 const range = DateRange.of('2026-10-01', '2026-10-06');
@@ -41,14 +49,14 @@ describe('PdfExporter', () => {
     const buffer = await new PdfExporter().export(report, {
       title: 'Optimization impact',
     });
-    const pdf = buffer.toString('latin1');
+    const pdf = pdfText(buffer);
 
-    expect(pdf).toContain(hex('Optimization impact'));
-    expect(pdf).toContain(hex('$300.00'));
-    expect(pdf).toContain(hex('Object Storage'));
-    expect(pdf).toContain(hex('Block Storage'));
-    expect(pdf).toContain(hex('2026-10-01'));
-    expect(pdf).toContain(hex('2026-10-05'));
+    expect(pdf).toContain('Optimization impact');
+    expect(pdf).toContain('$300.00');
+    expect(pdf).toContain('Object Storage');
+    expect(pdf).toContain('Block Storage');
+    expect(pdf).toContain('2026-10-01');
+    expect(pdf).toContain('2026-10-05');
   });
 
   it('includes a comparison section with the delta', async () => {
@@ -59,10 +67,10 @@ describe('PdfExporter', () => {
     );
 
     const buffer = await new PdfExporter().export(report, { comparison });
-    const pdf = buffer.toString('latin1');
+    const pdf = pdfText(buffer);
 
-    expect(pdf).toContain(hex('Comparison'));
-    expect(pdf).toContain(hex('$1,000.00'));
-    expect(pdf).toContain(hex('-70.0%'));
+    expect(pdf).toContain('Comparison');
+    expect(pdf).toContain('$1,000.00');
+    expect(pdf).toContain('-70.0%');
   });
 });

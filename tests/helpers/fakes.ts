@@ -3,7 +3,10 @@ import type {
   CostProvider,
   CostQuery,
 } from '../../src/application/ports/cost-provider.ts';
-import type { ExportContext, ReportExporter } from '../../src/application/ports/exporter.ts';
+import type {
+  ExportContext,
+  ReportExporter,
+} from '../../src/application/ports/exporter.ts';
 import type {
   Notification,
   Notifier,
@@ -63,10 +66,7 @@ export class FakeExporter implements ReportExporter {
     this.extension = extension;
   }
 
-  async export(
-    report: CostReport,
-    context?: ExportContext,
-  ): Promise<Buffer> {
+  async export(report: CostReport, context?: ExportContext): Promise<Buffer> {
     this.exported.push(report);
     this.contexts.push(context);
     return Buffer.from(`${this.format}:${report.total}`);

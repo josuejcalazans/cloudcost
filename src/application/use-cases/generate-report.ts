@@ -14,10 +14,13 @@ export interface GenerateReportInput {
   range: DateRange;
   groupBy?: GroupKey;
   format?: ReportFormat;
+  title?: string;
+  compareRange?: DateRange;
 }
 
 export interface GeneratedReport {
   report: CostReport;
+  comparison?: CostReport;
   buffer: Buffer;
   mimeType: string;
   filename: string;
@@ -55,10 +58,24 @@ export class GenerateReport {
       range: input.range,
     });
     const report = buildReport(records, input.range, groupBy);
-    const buffer = await exporter.export(report);
+
+    let comparison: CostReport | undefined;
+    if (input.compareRange !== undefined) {
+      const compareRecords = await this.getCosts.execute({
+        provider: input.provider,
+        range: input.compareRange,
+      });
+      comparison = buildReport(compareRecords, input.compareRange, groupBy);
+    }
+
+    const buffer = await exporter.export(report, {
+      title: input.title,
+      comparison,
+    });
 
     return {
       report,
+      comparison,
       buffer,
       mimeType: exporter.mimeType,
       filename: `cloudcost-${input.provider}-${input.range.from}_${input.range.to}.${exporter.extension}`,

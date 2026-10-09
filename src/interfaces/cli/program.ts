@@ -49,7 +49,7 @@ function requireGroupKey(value: string): GroupKey {
 function requireFormat(value: string) {
   if (!isReportFormat(value)) {
     throw new Error(
-      `unknown format "${value}" (expected json, csv, xlsx or zip)`,
+      `unknown format "${value}" (expected json, csv, xlsx, zip or pdf)`,
     );
   }
   return value;

@@ -156,7 +156,7 @@ describe('HTTP API', () => {
 
   it('rejects unknown formats and group keys', async () => {
     const badFormat = await fetch(
-      `${baseUrl}/api/v1/costs?${QUERY}&format=pdf`,
+      `${baseUrl}/api/v1/costs?${QUERY}&format=yaml`,
     );
     expect(badFormat.status).toBe(400);
 
