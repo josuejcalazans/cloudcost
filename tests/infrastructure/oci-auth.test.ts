@@ -113,7 +113,10 @@ describe('resolveOciCredentials', () => {
       profile: 'DEFAULT',
     });
     expect(
-      resolveOciCredentials({ OCI_PROFILE: 'PROD', OCI_REGION: 'us-ashburn-1' }),
+      resolveOciCredentials({
+        OCI_PROFILE: 'PROD',
+        OCI_REGION: 'us-ashburn-1',
+      }),
     ).toEqual({ mode: 'config_file', profile: 'PROD' });
   });
 

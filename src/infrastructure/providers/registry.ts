@@ -13,6 +13,7 @@ import {
   AwsCostProvider,
   type CostExplorerLike,
 } from './aws/aws-cost-provider.ts';
+import { resolveOciCredentials } from './oci/oci-auth.ts';
 import {
   OciCostProvider,
   type UsageApiClientLike,
@@ -20,43 +21,36 @@ import {
 
 type Env = Record<string, string | undefined>;
 
-function normalizePrivateKey(raw: string): string {
-  return raw.replace(/\\n/g, '\n');
-}
-
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function createOciProvider(config: AppConfig['oci'], env: Env): CostProvider {
-  const hasEnvAuth =
-    (env.OCI_USER_ID ?? '') !== '' &&
-    (env.OCI_FINGERPRINT ?? '') !== '' &&
-    (env.OCI_PRIVATE_KEY ?? '') !== '';
+function createOciProvider(env: Env): CostProvider {
+  const credentials = resolveOciCredentials(env);
 
-  const auth = hasEnvAuth
-    ? new SimpleAuthenticationDetailsProvider(
-        env.OCI_TENANCY_OCID ?? env.OCI_TENANCY_ID ?? '',
-        env.OCI_USER_ID ?? '',
-        env.OCI_FINGERPRINT ?? '',
-        normalizePrivateKey(env.OCI_PRIVATE_KEY ?? ''),
-        env.OCI_PRIVATE_KEY_PASSPHRASE ?? null,
-        Region.fromRegionId(env.OCI_REGION ?? 'us-ashburn-1'),
-      )
-    : new ConfigFileAuthenticationDetailsProvider(
-        env.OCI_CONFIG_FILE,
-        config.profile,
-      );
+  const auth =
+    credentials.mode === 'env'
+      ? new SimpleAuthenticationDetailsProvider(
+          credentials.tenancy,
+          credentials.user,
+          credentials.fingerprint,
+          credentials.privateKey,
+          credentials.passphrase,
+          Region.fromRegionId(credentials.region),
+        )
+      : new ConfigFileAuthenticationDetailsProvider(
+          env.OCI_CONFIG_FILE,
+          credentials.profile,
+        );
 
-  const configFileTenancy = hasEnvAuth
-    ? undefined
-    : (ConfigFileReader.parseDefault(config.profile).get('tenancy') ??
-      undefined);
   const tenancy =
-    env.OCI_TENANCY_OCID ?? env.OCI_TENANCY_ID ?? configFileTenancy;
+    credentials.mode === 'env'
+      ? credentials.tenancy
+      : (ConfigFileReader.parseDefault(credentials.profile).get('tenancy') ??
+        undefined);
   if (tenancy === undefined || tenancy === '') {
     throw new Error(
-      'unable to resolve the OCI tenancy OCID (set OCI_TENANCY_OCID)',
+      'unable to resolve the OCI tenancy OCID (set OCI_TENANCY_ID)',
     );
   }
 
@@ -86,7 +80,7 @@ export function buildProviders(
   const providers = new Map<ProviderId, CostProvider>();
 
   try {
-    providers.set('oci', createOciProvider(config.oci, env));
+    providers.set('oci', createOciProvider(env));
   } catch (error) {
     console.warn(`[cloudcost] OCI provider disabled: ${errorMessage(error)}`);
   }
