@@ -21,6 +21,7 @@ import { NodeCronScheduler } from './infrastructure/scheduler/node-cron-schedule
 import {
   isObjectStorageConfigured,
   OciObjectStorage,
+  objectStorageClientOptions,
 } from './infrastructure/storage/oci-object-storage.ts';
 
 export interface CreateCloudCostOptions {
@@ -39,13 +40,7 @@ function buildStorage(config: AppConfig): OciObjectStorage | null {
   }
   return new OciObjectStorage(
     objectStorage,
-    new S3Client({
-      region: objectStorage.region,
-      credentials: {
-        accessKeyId: objectStorage.accessKeyId,
-        secretAccessKey: objectStorage.secretAccessKey,
-      },
-    }),
+    new S3Client(objectStorageClientOptions(objectStorage)),
   );
 }
 
@@ -159,6 +154,8 @@ export {
   isObjectStorageConfigured,
   type ObjectStorageConfig,
   OciObjectStorage,
+  objectStorageClientOptions,
+  objectStorageEndpoint,
   objectStorageUrl,
   sanitizeObjectName,
 } from './infrastructure/storage/oci-object-storage.ts';

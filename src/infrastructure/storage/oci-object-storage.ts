@@ -25,11 +25,32 @@ export function isObjectStorageConfigured(
   );
 }
 
+export function objectStorageEndpoint(config: ObjectStorageConfig): string {
+  return `https://${config.namespace}.compat.objectstorage.${config.region}.oraclecloud.com`;
+}
+
 export function objectStorageUrl(
   config: ObjectStorageConfig,
   key: string,
 ): string {
-  return `https://${config.namespace}.compat.objectstorage.${config.region}.oraclecloud.com/${config.bucket}/${key}`;
+  return `${objectStorageEndpoint(config)}/${config.bucket}/${key}`;
+}
+
+/**
+ * S3 client options for the OCI Object Storage compat endpoint. Path-style
+ * addressing is required because virtual-host style would resolve the bucket
+ * as an amazonaws.com subdomain instead of the compat endpoint.
+ */
+export function objectStorageClientOptions(config: ObjectStorageConfig) {
+  return {
+    region: config.region,
+    endpoint: objectStorageEndpoint(config),
+    forcePathStyle: true,
+    credentials: {
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
+    },
+  };
 }
 
 /**

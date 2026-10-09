@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   isObjectStorageConfigured,
   OciObjectStorage,
+  objectStorageClientOptions,
   objectStorageUrl,
   sanitizeObjectName,
 } from '../../src/infrastructure/storage/oci-object-storage.ts';
@@ -45,6 +46,18 @@ describe('objectStorageUrl', () => {
     expect(objectStorageUrl(config, 'cloudcost/report.pdf')).toBe(
       'https://springbot.compat.objectstorage.us-ashburn-1.oraclecloud.com/reports/cloudcost/report.pdf',
     );
+  });
+});
+
+describe('objectStorageClientOptions', () => {
+  it('points the s3 client at the oci compat endpoint with path style', () => {
+    expect(objectStorageClientOptions(config)).toEqual({
+      region: 'us-ashburn-1',
+      endpoint:
+        'https://springbot.compat.objectstorage.us-ashburn-1.oraclecloud.com',
+      forcePathStyle: true,
+      credentials: { accessKeyId: 'key', secretAccessKey: 'secret' },
+    });
   });
 });
 
