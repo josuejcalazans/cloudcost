@@ -3,7 +3,7 @@
 [![CI](https://github.com/josuejcalazans/cloudcost/actions/workflows/ci.yml/badge.svg)](https://github.com/josuejcalazans/cloudcost/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/tests-106%20passing-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-116%20passing-brightgreen.svg)](#testing)
 
 **Multi-cloud cost intelligence for OCI and AWS** — one CLI, one HTTP API, four
 export formats (JSON / CSV / XLSX / ZIP) and scheduled email reports, built as
@@ -172,7 +172,8 @@ Environment variables (see [.env.example](./.env.example)):
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `OCI_CONFIG_FILE` / `OCI_PROFILE` | `~/.oci/config` / `DEFAULT` | OCI config-file auth (or full env auth via `OCI_TENANCY_ID`, `OCI_USER_ID`, `OCI_FINGERPRINT`, `OCI_PRIVATE_KEY`, `OCI_REGION`) |
+| `OCI_TENANCY_ID` / `OCI_USER_ID` / `OCI_FINGERPRINT` / `OCI_PRIVATE_KEY` (or `OCI_PRIVATE_KEY_PATH`) / `OCI_REGION` | — / `us-ashburn-1` | OCI env auth, same variables as springbot/www (aliases: `OCI_TENANCY_OCID`, `OCI_USER_OCID`) |
+| `OCI_CONFIG_FILE` / `OCI_PROFILE` | `~/.oci/config` / `DEFAULT` | config-file fallback, used only when the env variables above are empty |
 | `AWS_REGION` / `AWS_PROFILE` | `us-east-1` / `default` | AWS Cost Explorer |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` | — | outbound mail |
 | `MAIL_FROM` / `MAIL_TO` | `cloudcost@example.com` / — | default sender and recipients (comma-separated list) |
@@ -182,7 +183,7 @@ Environment variables (see [.env.example](./.env.example)):
 
 ## Testing
 
-106 tests across 17 files — domain invariants, use cases with fake ports,
+116 tests across 18 files — domain invariants, use cases with fake ports,
 each adapter against fake transports/clients, and the HTTP API exercised
 over a real socket:
 
