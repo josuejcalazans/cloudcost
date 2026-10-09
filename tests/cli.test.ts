@@ -208,9 +208,7 @@ describe('cloudcost CLI', () => {
         prefix: 'cloudcost',
       }),
     );
-    expect(deps.print).toHaveBeenCalledWith(
-      `uploaded ${uploaded.url}`,
-    );
+    expect(deps.print).toHaveBeenCalledWith(`uploaded ${uploaded.url}`);
     expect(deps.writeFile).not.toHaveBeenCalled();
     expect(deps.printBuffer).not.toHaveBeenCalled();
   });

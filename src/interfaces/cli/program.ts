@@ -5,6 +5,10 @@ import type {
   GenerateReportInput,
 } from '../../application/use-cases/generate-report.ts';
 import type { SendReportInput } from '../../application/use-cases/send-report.ts';
+import type {
+  UploadedReport,
+  UploadReportInput,
+} from '../../application/use-cases/upload-report.ts';
 import {
   type GroupKey,
   isGroupKey,
@@ -18,6 +22,7 @@ import { DateRange } from '../../domain/value-objects/date-range.ts';
 export interface CliDeps {
   generateReport(input: GenerateReportInput): Promise<GeneratedReport>;
   sendReportEmail(input: SendReportInput): Promise<GeneratedReport>;
+  uploadReport(input: UploadReportInput): Promise<UploadedReport>;
   startServer(port?: number): void;
   scheduleReports(options: {
     cron: string;
@@ -67,6 +72,20 @@ function collect(value: string, previous: string[]): string[] {
   return [...previous, value];
 }
 
+function requireCompareRange(options: {
+  compareFrom?: string;
+  compareTo?: string;
+}): DateRange | undefined {
+  const { compareFrom, compareTo } = options;
+  if (compareFrom === undefined && compareTo === undefined) {
+    return undefined;
+  }
+  if (compareFrom === undefined || compareTo === undefined) {
+    throw new Error('use --compare-from and --compare-to together');
+  }
+  return DateRange.of(compareFrom, compareTo);
+}
+
 export function createProgram(deps: CliDeps): Command {
   const program = new Command();
   program
@@ -83,18 +102,51 @@ export function createProgram(deps: CliDeps): Command {
     .requiredOption('--from <date>', 'start date, YYYY-MM-DD (inclusive)')
     .requiredOption('--to <date>', 'end date, YYYY-MM-DD (exclusive)')
     .option('--group-by <key>', 'service | region | day | provider', 'service')
-    .option('--format <format>', 'json | csv | xlsx | zip', 'json')
+    .option('--format <format>', 'json | csv | xlsx | zip | pdf', 'json')
     .option('--out <file>', 'write the report to a file instead of stdout')
-    .action(async (options: Record<string, string>) => {
-      const generated = await deps.generateReport({
-        provider: requireProvider(options.provider),
-        range: DateRange.of(options.from, options.to),
-        groupBy: requireGroupKey(options.groupBy),
-        format: requireFormat(options.format),
-      });
+    .option('--title <text>', 'report title rendered by rich formats')
+    .option(
+      '--compare-from <date>',
+      'comparison start date, YYYY-MM-DD (inclusive)',
+    )
+    .option(
+      '--compare-to <date>',
+      'comparison end date, YYYY-MM-DD (exclusive)',
+    )
+    .option('--upload', 'upload the report to object storage')
+    .option('--prefix <prefix>', 'object storage key prefix', 'cloudcost')
+    .action(async (options: Record<string, string | boolean>) => {
+      if (options.upload !== undefined && options.out !== undefined) {
+        throw new Error('use either --out or --upload, not both');
+      }
 
+      const compareRange = requireCompareRange({
+        compareFrom: options.compareFrom as string | undefined,
+        compareTo: options.compareTo as string | undefined,
+      });
+      const common = {
+        provider: requireProvider(options.provider as string),
+        range: DateRange.of(options.from as string, options.to as string),
+        groupBy: requireGroupKey(options.groupBy as string),
+        format: requireFormat(options.format as string),
+        ...(options.title !== undefined
+          ? { title: options.title as string }
+          : {}),
+        ...(compareRange !== undefined ? { compareRange } : {}),
+      };
+
+      if (options.upload !== undefined) {
+        const uploaded = await deps.uploadReport({
+          ...common,
+          prefix: options.prefix as string,
+        });
+        deps.print(`uploaded ${uploaded.url}`);
+        return;
+      }
+
+      const generated = await deps.generateReport(common);
       if (options.out !== undefined) {
-        deps.writeFile(options.out, generated.buffer);
+        deps.writeFile(options.out as string, generated.buffer);
         deps.print(
           `wrote ${options.out} (${generated.report.total} ${generated.report.currency})`,
         );
@@ -112,7 +164,7 @@ export function createProgram(deps: CliDeps): Command {
     .requiredOption('--from <date>', 'start date, YYYY-MM-DD (inclusive)')
     .requiredOption('--to <date>', 'end date, YYYY-MM-DD (exclusive)')
     .option('--group-by <key>', 'service | region | day | provider', 'service')
-    .option('--format <format>', 'json | csv | xlsx | zip', 'csv')
+    .option('--format <format>', 'json | csv | xlsx | zip | pdf', 'csv')
     .option(
       '--recipient <email>',
       'recipient address (repeatable)',

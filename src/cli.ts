@@ -10,6 +10,7 @@ const cloudcost = createCloudCost();
 const program = createProgram({
   generateReport: (input) => cloudcost.generateReport.execute(input),
   sendReportEmail: (input) => cloudcost.sendReport.execute(input),
+  uploadReport: (input) => cloudcost.uploadReport.execute(input),
   startServer: (port) => startServer(port),
   scheduleReports: ({ cron, timezone, provider, days }) => {
     cloudcost.scheduler.schedule(cron, timezone, () =>

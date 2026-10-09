@@ -1,3 +1,4 @@
+import { S3Client } from '@aws-sdk/client-s3';
 import type { CachePort } from './application/ports/cache.ts';
 import type { CostProvider } from './application/ports/cost-provider.ts';
 import type {
@@ -5,9 +6,11 @@ import type {
   ReportFormat,
 } from './application/ports/exporter.ts';
 import type { Notifier } from './application/ports/notifier.ts';
+import type { StoragePort } from './application/ports/storage.ts';
 import { GenerateReport } from './application/use-cases/generate-report.ts';
 import { GetCosts } from './application/use-cases/get-costs.ts';
 import { SendReport } from './application/use-cases/send-report.ts';
+import { UploadReport } from './application/use-cases/upload-report.ts';
 import { type AppConfig, loadConfig } from './config.ts';
 import type { ProviderId } from './domain/entities/cost-record.ts';
 import { MemoryCache } from './infrastructure/cache/memory-cache.ts';
@@ -15,6 +18,10 @@ import { createDefaultExporters } from './infrastructure/exporters/registry.ts';
 import { SmtpMailer } from './infrastructure/mailer/smtp-mailer.ts';
 import { buildProviders } from './infrastructure/providers/registry.ts';
 import { NodeCronScheduler } from './infrastructure/scheduler/node-cron-scheduler.ts';
+import {
+  isObjectStorageConfigured,
+  OciObjectStorage,
+} from './infrastructure/storage/oci-object-storage.ts';
 
 export interface CreateCloudCostOptions {
   config?: AppConfig;
@@ -22,6 +29,24 @@ export interface CreateCloudCostOptions {
   cache?: CachePort;
   exporters?: Map<ReportFormat, ReportExporter>;
   notifier?: Notifier;
+  storage?: StoragePort | null;
+}
+
+function buildStorage(config: AppConfig): OciObjectStorage | null {
+  const objectStorage = config.objectStorage;
+  if (!isObjectStorageConfigured(objectStorage)) {
+    return null;
+  }
+  return new OciObjectStorage(
+    objectStorage,
+    new S3Client({
+      region: objectStorage.region,
+      credentials: {
+        accessKeyId: objectStorage.accessKeyId,
+        secretAccessKey: objectStorage.secretAccessKey,
+      },
+    }),
+  );
 }
 
 /**
@@ -34,6 +59,8 @@ export function createCloudCost(options: CreateCloudCostOptions = {}) {
   const cache = options.cache ?? new MemoryCache();
   const exporters = options.exporters ?? createDefaultExporters();
   const notifier = options.notifier ?? SmtpMailer.fromConfig(config.smtp);
+  const storage =
+    options.storage !== undefined ? options.storage : buildStorage(config);
 
   const getCosts = new GetCosts(
     providers,
@@ -45,6 +72,7 @@ export function createCloudCost(options: CreateCloudCostOptions = {}) {
     from: config.mail.from,
     recipients: config.mail.recipients,
   });
+  const uploadReport = new UploadReport(generateReport, storage);
   const scheduler = new NodeCronScheduler();
 
   return {
@@ -53,9 +81,11 @@ export function createCloudCost(options: CreateCloudCostOptions = {}) {
     cache,
     exporters,
     notifier,
+    storage,
     getCosts,
     generateReport,
     sendReport,
+    uploadReport,
     scheduler,
   };
 }
