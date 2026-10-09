@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { GenerateReportInput } from '../src/application/use-cases/generate-report.ts';
 import type { SendReportInput } from '../src/application/use-cases/send-report.ts';
+import type {
+  UploadedReport,
+  UploadReportInput,
+} from '../src/application/use-cases/upload-report.ts';
 import type { CliDeps } from '../src/interfaces/cli/program.ts';
 import { createProgram } from '../src/interfaces/cli/program.ts';
 
@@ -19,14 +23,23 @@ const generated = {
   filename: 'cloudcost-oci-2026-10-01_2026-10-05.csv',
 };
 
+const uploaded: UploadedReport = {
+  url: 'https://storage.example.com/cloudcost/cloudcost-oci-2026-10-01_2026-10-05.pdf',
+  key: 'cloudcost/cloudcost-oci-2026-10-01_2026-10-05.pdf',
+  filename: 'cloudcost-oci-2026-10-01_2026-10-05.pdf',
+  report: generated.report,
+};
+
 function buildDeps() {
   const generateReport = vi.fn(
     async (_input: GenerateReportInput) => generated,
   );
   const sendReportEmail = vi.fn(async (_input: SendReportInput) => generated);
+  const uploadReport = vi.fn(async (_input: UploadReportInput) => uploaded);
   const deps: CliDeps = {
     generateReport,
     sendReportEmail,
+    uploadReport,
     startServer: vi.fn(),
     scheduleReports: vi.fn(),
     writeFile: vi.fn(),
@@ -37,6 +50,7 @@ function buildDeps() {
     deps,
     generateReport,
     sendReportEmail,
+    uploadReport,
     scheduleReports: deps.scheduleReports,
     startServer: deps.startServer,
   };
@@ -115,6 +129,135 @@ describe('cloudcost CLI', () => {
       ]),
     ).rejects.toThrow(/provider/);
     expect(generateReport).not.toHaveBeenCalled();
+  });
+
+  it('passes a title and comparison range to the report', async () => {
+    const { deps, generateReport } = buildDeps();
+
+    await createProgram(deps).parseAsync([
+      'node',
+      'cloudcost',
+      'costs',
+      '--provider',
+      'oci',
+      '--from',
+      '2026-10-01',
+      '--to',
+      '2026-10-06',
+      '--format',
+      'pdf',
+      '--title',
+      'Optimization impact',
+      '--compare-from',
+      '2026-09-01',
+      '--compare-to',
+      '2026-09-16',
+    ]);
+
+    const input = generateReport.mock.calls[0]?.[0];
+    expect(input?.title).toBe('Optimization impact');
+    expect(input?.compareRange?.from).toBe('2026-09-01');
+    expect(input?.compareRange?.to).toBe('2026-09-16');
+    expect(input?.format).toBe('pdf');
+  });
+
+  it('requires both comparison flags together', async () => {
+    const { deps, generateReport } = buildDeps();
+
+    await expect(
+      createProgram(deps).parseAsync([
+        'node',
+        'cloudcost',
+        'costs',
+        '--provider',
+        'oci',
+        '--from',
+        '2026-10-01',
+        '--to',
+        '2026-10-06',
+        '--compare-from',
+        '2026-09-01',
+      ]),
+    ).rejects.toThrow(/compare/);
+    expect(generateReport).not.toHaveBeenCalled();
+  });
+
+  it('uploads the report to object storage instead of writing a file', async () => {
+    const { deps, generateReport, uploadReport } = buildDeps();
+
+    await createProgram(deps).parseAsync([
+      'node',
+      'cloudcost',
+      'costs',
+      '--provider',
+      'oci',
+      '--from',
+      '2026-10-01',
+      '--to',
+      '2026-10-06',
+      '--format',
+      'pdf',
+      '--upload',
+    ]);
+
+    expect(generateReport).not.toHaveBeenCalled();
+    expect(uploadReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: 'oci',
+        format: 'pdf',
+        prefix: 'cloudcost',
+      }),
+    );
+    expect(deps.print).toHaveBeenCalledWith(
+      `uploaded ${uploaded.url}`,
+    );
+    expect(deps.writeFile).not.toHaveBeenCalled();
+    expect(deps.printBuffer).not.toHaveBeenCalled();
+  });
+
+  it('uploads under a custom object prefix', async () => {
+    const { deps, uploadReport } = buildDeps();
+
+    await createProgram(deps).parseAsync([
+      'node',
+      'cloudcost',
+      'costs',
+      '--provider',
+      'oci',
+      '--from',
+      '2026-10-01',
+      '--to',
+      '2026-10-06',
+      '--upload',
+      '--prefix',
+      'kpi/',
+    ]);
+
+    expect(uploadReport).toHaveBeenCalledWith(
+      expect.objectContaining({ prefix: 'kpi/' }),
+    );
+  });
+
+  it('rejects combining --out with --upload', async () => {
+    const { deps, uploadReport } = buildDeps();
+
+    await expect(
+      createProgram(deps).parseAsync([
+        'node',
+        'cloudcost',
+        'costs',
+        '--provider',
+        'oci',
+        '--from',
+        '2026-10-01',
+        '--to',
+        '2026-10-06',
+        '--out',
+        '/tmp/report.pdf',
+        '--upload',
+      ]),
+    ).rejects.toThrow(/--out.*--upload/);
+    expect(uploadReport).not.toHaveBeenCalled();
   });
 
   it('emails a report with explicit recipients', async () => {
