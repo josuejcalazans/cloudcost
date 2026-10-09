@@ -2,8 +2,8 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { describe, expect, it } from 'vitest';
 import {
   isObjectStorageConfigured,
-  objectStorageUrl,
   OciObjectStorage,
+  objectStorageUrl,
   sanitizeObjectName,
 } from '../../src/infrastructure/storage/oci-object-storage.ts';
 

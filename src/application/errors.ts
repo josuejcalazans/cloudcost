@@ -27,4 +27,12 @@ export class MissingRecipientsError extends ApplicationError {
   }
 }
 
+export class ObjectStorageNotConfiguredError extends ApplicationError {
+  constructor() {
+    super(
+      'object storage is not configured (set OCI_NAMESPACE, OCI_BUCKET, OCI_ACCESS_KEY_ID and OCI_SECRET_ACCESS_KEY)',
+    );
+  }
+}
+
 export class InvalidQueryError extends ApplicationError {}

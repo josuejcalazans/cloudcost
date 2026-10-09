@@ -20,6 +20,13 @@ export interface AppConfig {
   oci: {
     profile: string;
   };
+  objectStorage: {
+    namespace: string;
+    bucket: string;
+    region: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
   aws: {
     region: string;
     accountIds: string[];
@@ -62,6 +69,13 @@ export function loadConfig(
     },
     oci: {
       profile: env.OCI_PROFILE ?? 'DEFAULT',
+    },
+    objectStorage: {
+      namespace: env.OCI_NAMESPACE ?? '',
+      bucket: env.OCI_BUCKET ?? '',
+      region: env.OCI_REGION ?? 'us-ashburn-1',
+      accessKeyId: env.OCI_ACCESS_KEY_ID ?? '',
+      secretAccessKey: env.OCI_SECRET_ACCESS_KEY ?? '',
     },
     aws: {
       region: env.AWS_REGION ?? 'us-east-1',

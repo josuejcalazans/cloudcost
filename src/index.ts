@@ -66,6 +66,7 @@ export {
   ApplicationError,
   InvalidQueryError,
   MissingRecipientsError,
+  ObjectStorageNotConfiguredError,
   ProviderNotConfiguredError,
   UnsupportedFormatError,
 } from './application/errors.ts';
@@ -84,6 +85,7 @@ export type {
   Notification,
   Notifier,
 } from './application/ports/notifier.ts';
+export type { StoragePort } from './application/ports/storage.ts';
 export {
   type GeneratedReport,
   GenerateReport,
@@ -94,6 +96,11 @@ export {
   SendReport,
   type SendReportInput,
 } from './application/use-cases/send-report.ts';
+export {
+  type UploadedReport,
+  UploadReport,
+  type UploadReportInput,
+} from './application/use-cases/upload-report.ts';
 export { type AppConfig, loadConfig } from './config.ts';
 export {
   buildReport,
@@ -113,9 +120,17 @@ export * from './domain/errors.ts';
 export { DateRange } from './domain/value-objects/date-range.ts';
 export { Money } from './domain/value-objects/money.ts';
 export { MemoryCache } from './infrastructure/cache/memory-cache.ts';
+export { PdfExporter } from './infrastructure/exporters/pdf-exporter.ts';
 export { createDefaultExporters } from './infrastructure/exporters/registry.ts';
 export { SmtpMailer } from './infrastructure/mailer/smtp-mailer.ts';
 export { buildProviders } from './infrastructure/providers/registry.ts';
 export { NodeCronScheduler } from './infrastructure/scheduler/node-cron-scheduler.ts';
+export {
+  isObjectStorageConfigured,
+  type ObjectStorageConfig,
+  OciObjectStorage,
+  objectStorageUrl,
+  sanitizeObjectName,
+} from './infrastructure/storage/oci-object-storage.ts';
 export { type CliDeps, createProgram } from './interfaces/cli/program.ts';
 export { type AppDependencies, createApp } from './interfaces/http/app.ts';

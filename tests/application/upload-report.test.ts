@@ -5,11 +5,7 @@ import { GenerateReport } from '../../src/application/use-cases/generate-report.
 import { GetCosts } from '../../src/application/use-cases/get-costs.ts';
 import { UploadReport } from '../../src/application/use-cases/upload-report.ts';
 import { DateRange } from '../../src/domain/value-objects/date-range.ts';
-import {
-  FakeExporter,
-  FakeProvider,
-  MemoryCache,
-} from '../helpers/fakes.ts';
+import { FakeExporter, FakeProvider, MemoryCache } from '../helpers/fakes.ts';
 import { record } from '../helpers/records.ts';
 
 const range = DateRange.of('2026-10-01', '2026-10-05');
