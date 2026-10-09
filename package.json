@@ -15,6 +15,15 @@
     "spreadsheet"
   ],
   "license": "MIT",
+  "author": "Josue J Calazans",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josuejcalazans/cloudcost.git"
+  },
+  "bugs": {
+    "url": "https://github.com/josuejcalazans/cloudcost/issues"
+  },
+  "homepage": "https://github.com/josuejcalazans/cloudcost#readme",
   "type": "module",
   "engines": {
     "node": ">=24"
