@@ -17,18 +17,21 @@ const report = buildReport(
 );
 
 describe('exporters registry', () => {
-  it('registers the four supported formats', () => {
+  it('registers the five supported formats', () => {
     const exporters = createDefaultExporters();
 
     expect([...exporters.keys()].sort()).toEqual([
       'csv',
       'json',
+      'pdf',
       'xlsx',
       'zip',
     ]);
     expect(exporters.get('json')?.mimeType).toBe('application/json');
     expect(exporters.get('csv')?.mimeType).toBe('text/csv');
     expect(exporters.get('csv')?.extension).toBe('csv');
+    expect(exporters.get('pdf')?.mimeType).toBe('application/pdf');
+    expect(exporters.get('pdf')?.extension).toBe('pdf');
     expect(exporters.get('xlsx')?.mimeType).toBe(
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
@@ -46,6 +49,23 @@ describe('json exporter', () => {
     expect(parsed.range).toEqual({ from: '2026-10-01', to: '2026-10-05' });
     expect(parsed.records).toHaveLength(2);
     expect(parsed.groups[0].key).toBe('Object Storage');
+    expect(parsed.comparison).toBeUndefined();
+  });
+
+  it('embeds the comparison report when the context provides one', async () => {
+    const json = createDefaultExporters().get('json');
+    const comparison = buildReport(
+      [record({ service: 'Compute', amount: 9 })],
+      DateRange.of('2026-09-01', '2026-09-05'),
+      'service',
+    );
+
+    const buffer = await json!.export(report, { comparison });
+    const parsed = JSON.parse(buffer.toString());
+
+    expect(parsed.total).toBe(4);
+    expect(parsed.comparison.total).toBe(9);
+    expect(parsed.comparison.range.from).toBe('2026-09-01');
   });
 });
 

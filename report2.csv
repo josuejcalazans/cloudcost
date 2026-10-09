@@ -1,0 +1,269 @@
+date,provider,service,region,amount,currency
+2026-08-21,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-02,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-13,oci,Compute,us-ashburn-1,157.870070829866,USD
+2026-08-28,oci,Object Storage,us-ashburn-1,12.008617979446,USD
+2026-08-10,oci,Compute,us-ashburn-1,157.87007082987,USD
+2026-08-24,oci,Compute,us-ashburn-1,157.258070829864,USD
+2026-08-29,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-13,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-20,oci,Virtual Cloud Network,us-ashburn-1,0.378449656965,USD
+2026-08-06,oci,Functions,us-ashburn-1,0,USD
+2026-08-19,oci,Virtual Cloud Network,us-ashburn-1,0.482928764174,USD
+2026-08-15,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-03,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-28,oci,Virtual Cloud Network,us-ashburn-1,0.105220432255,USD
+2026-08-28,oci,Functions,us-ashburn-1,0,USD
+2026-08-03,oci,Functions,us-ashburn-1,0,USD
+2026-08-01,oci,API Gateway,us-ashburn-1,0.00262575,USD
+2026-08-13,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-25,oci,Functions,us-ashburn-1,0,USD
+2026-08-02,oci,Functions,us-ashburn-1,0,USD
+2026-08-27,oci,API Gateway,us-ashburn-1,0.00411975,USD
+2026-08-05,oci,Logging,us-ashburn-1,0.22331600847,USD
+2026-08-30,oci,Functions,us-ashburn-1,0.00533985,USD
+2026-08-19,oci,Functions,us-ashburn-1,0,USD
+2026-08-02,oci,Object Storage,us-ashburn-1,2.653603661753,USD
+2026-08-03,oci,Logging,us-ashburn-1,0.203844070132,USD
+2026-08-16,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-23,oci,API Gateway,us-ashburn-1,0.0063315,USD
+2026-08-18,oci,Functions,us-ashburn-1,0,USD
+2026-08-20,oci,API Gateway,us-ashburn-1,0.009063,USD
+2026-08-15,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-03,oci,API Gateway,us-ashburn-1,0.00371475,USD
+2026-08-10,oci,Logging,us-ashburn-1,0.241180088861,USD
+2026-08-22,oci,Email Delivery,us-ashburn-1,0.00019125,USD
+2026-08-22,oci,Functions,us-ashburn-1,0,USD
+2026-08-10,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-17,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-12,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-17,oci,Block Storage,us-ashburn-1,125.648242941799,USD
+2026-08-17,oci,Compute,us-ashburn-1,157.595847079865,USD
+2026-08-19,oci,Compute,us-ashburn-1,157.258070829865,USD
+2026-08-21,oci,Virtual Cloud Network,us-ashburn-1,0.304654937672,USD
+2026-08-06,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-18,oci,Logging,us-ashburn-1,0.255046736062,USD
+2026-08-20,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-11,oci,Compute,us-ashburn-1,157.870070829864,USD
+2026-08-14,oci,Compute,us-ashburn-1,157.870070829865,USD
+2026-08-11,oci,Object Storage,us-ashburn-1,3.644252255668,USD
+2026-08-29,oci,API Gateway,us-ashburn-1,0.00704475,USD
+2026-08-30,oci,Compute,us-ashburn-1,143.182070829874,USD
+2026-08-28,oci,API Gateway,us-ashburn-1,0.009828,USD
+2026-08-07,oci,Object Storage,us-ashburn-1,2.870413079793,USD
+2026-08-24,oci,Functions,us-ashburn-1,0,USD
+2026-08-22,oci,API Gateway,us-ashburn-1,0.00451125,USD
+2026-08-12,oci,Logging,us-ashburn-1,0.256864766004,USD
+2026-08-14,oci,Object Storage,us-ashburn-1,10.071650718321,USD
+2026-08-01,oci,Object Storage,us-ashburn-1,2.845610498048,USD
+2026-08-08,oci,Object Storage,us-ashburn-1,2.676870743868,USD
+2026-08-25,oci,API Gateway,us-ashburn-1,0.0045,USD
+2026-08-09,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-05,oci,API Gateway,us-ashburn-1,0.00265725,USD
+2026-08-24,oci,Object Storage,us-ashburn-1,19.416896250931,USD
+2026-08-14,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-28,oci,Logging,us-ashburn-1,0.279787721251,USD
+2026-08-18,oci,Email Delivery,us-ashburn-1,0.00962625,USD
+2026-08-26,oci,Functions,us-ashburn-1,0,USD
+2026-08-04,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-15,oci,Logging,us-ashburn-1,0.270867713393,USD
+2026-08-16,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-14,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-27,oci,Virtual Cloud Network,us-ashburn-1,0.113084903893,USD
+2026-08-16,oci,Logging,us-ashburn-1,0.268920301378,USD
+2026-08-18,oci,Virtual Cloud Network,us-ashburn-1,2.817443075588,USD
+2026-08-30,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-01,oci,Block Storage,us-ashburn-1,125.707956653298,USD
+2026-08-11,oci,API Gateway,us-ashburn-1,0.0054495,USD
+2026-08-04,oci,Compute,us-ashburn-1,157.87007082987,USD
+2026-08-27,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-23,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-29,oci,Virtual Cloud Network,us-ashburn-1,0.078147724923,USD
+2026-08-10,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-26,oci,Virtual Cloud Network,us-ashburn-1,0.136618387047,USD
+2026-08-19,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-03,oci,Object Storage,us-ashburn-1,2.62767854134,USD
+2026-08-04,oci,Functions,us-ashburn-1,0,USD
+2026-08-26,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-15,oci,Virtual Cloud Network,us-ashburn-1,0.035316280299,USD
+2026-08-24,oci,API Gateway,us-ashburn-1,0.0094275,USD
+2026-08-21,oci,Compute,us-ashburn-1,157.258070829864,USD
+2026-08-16,oci,Virtual Cloud Network,us-ashburn-1,0.031605985684,USD
+2026-08-10,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-15,oci,API Gateway,us-ashburn-1,0.0031545,USD
+2026-08-19,oci,API Gateway,us-ashburn-1,0.00401625,USD
+2026-08-21,oci,Logging,us-ashburn-1,0.237197882235,USD
+2026-08-19,oci,Object Storage,us-ashburn-1,3.50997780114,USD
+2026-08-27,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-07,oci,Functions,us-ashburn-1,0,USD
+2026-08-16,oci,Functions,us-ashburn-1,0,USD
+2026-08-06,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-08,oci,Logging,us-ashburn-1,0.239864951061,USD
+2026-08-11,oci,Logging,us-ashburn-1,0.244632259689,USD
+2026-08-12,oci,Functions,us-ashburn-1,0,USD
+2026-08-11,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-16,oci,Object Storage,us-ashburn-1,4.181116717828,USD
+2026-08-11,oci,Functions,us-ashburn-1,0,USD
+2026-08-17,oci,Logging,us-ashburn-1,0.261611999335,USD
+2026-08-14,oci,Logging,us-ashburn-1,0.275661755565,USD
+2026-08-21,oci,Functions,us-ashburn-1,0,USD
+2026-08-26,oci,Logging,us-ashburn-1,0.271900293719,USD
+2026-08-28,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-09,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-23,oci,Email Delivery,us-ashburn-1,0.00184875,USD
+2026-08-04,oci,API Gateway,us-ashburn-1,0.00384075,USD
+2026-08-20,oci,Functions,us-ashburn-1,0,USD
+2026-08-05,oci,Compute,us-ashburn-1,157.87007082987,USD
+2026-08-08,oci,Compute,us-ashburn-1,157.866193329877,USD
+2026-08-05,oci,Object Storage,us-ashburn-1,3.782534467666,USD
+2026-08-20,oci,Compute,us-ashburn-1,157.258070829865,USD
+2026-08-15,oci,Object Storage,us-ashburn-1,4.887922725859,USD
+2026-08-14,oci,Virtual Cloud Network,us-ashburn-1,0.164046986082,USD
+2026-08-09,oci,Compute,us-ashburn-1,157.870070829871,USD
+2026-08-08,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-04,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-01,oci,Compute,us-ashburn-1,157.870070829877,USD
+2026-08-08,oci,API Gateway,us-ashburn-1,0.00363825,USD
+2026-08-11,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-16,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-26,oci,Compute,us-ashburn-1,157.258070829874,USD
+2026-08-12,oci,Object Storage,us-ashburn-1,3.401916141011,USD
+2026-08-10,oci,Functions,us-ashburn-1,0,USD
+2026-08-18,oci,Object Storage,us-ashburn-1,4.075241181815,USD
+2026-08-09,oci,Functions,us-ashburn-1,0,USD
+2026-08-14,oci,Functions,us-ashburn-1,0,USD
+2026-08-24,oci,Logging,us-ashburn-1,0.231650286113,USD
+2026-08-07,oci,Logging,us-ashburn-1,0.23755033267,USD
+2026-08-09,oci,API Gateway,us-ashburn-1,0.0037395,USD
+2026-08-08,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-13,oci,API Gateway,us-ashburn-1,0.00517725,USD
+2026-08-13,oci,Logging,us-ashburn-1,0.264727895187,USD
+2026-08-21,oci,Email Delivery,us-ashburn-1,0.0057375,USD
+2026-08-08,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-21,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-29,oci,Logging,us-ashburn-1,0.282850929451,USD
+2026-08-27,oci,Email Delivery,us-ashburn-1,0.00758625,USD
+2026-08-05,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-02,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-01,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-03,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-11,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-18,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-24,oci,Virtual Cloud Network,us-ashburn-1,0.077455961522,USD
+2026-08-15,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-23,oci,Object Storage,us-ashburn-1,3.496267170774,USD
+2026-08-29,oci,Functions,us-ashburn-1,0,USD
+2026-08-29,oci,Object Storage,us-ashburn-1,7.628939172255,USD
+2026-08-03,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-12,oci,Compute,us-ashburn-1,157.870070829867,USD
+2026-08-13,oci,Object Storage,us-ashburn-1,7.524366527416,USD
+2026-08-25,oci,Virtual Cloud Network,us-ashburn-1,0.076050319753,USD
+2026-08-23,oci,Compute,us-ashburn-1,157.258070829864,USD
+2026-08-18,oci,API Gateway,us-ashburn-1,0.00261675,USD
+2026-08-07,oci,API Gateway,us-ashburn-1,0.0037395,USD
+2026-08-12,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-17,oci,Functions,us-ashburn-1,0,USD
+2026-08-28,oci,Email Delivery,us-ashburn-1,0.00172125,USD
+2026-08-02,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-17,oci,API Gateway,us-ashburn-1,0.001809,USD
+2026-08-30,oci,API Gateway,us-ashburn-1,0.0053865,USD
+2026-08-12,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-23,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-10,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-04,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-23,oci,Virtual Cloud Network,us-ashburn-1,0.036854870771,USD
+2026-08-24,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-07,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-02,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-28,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-13,oci,Virtual Cloud Network,us-ashburn-1,0.041646868651,USD
+2026-08-22,oci,Object Storage,us-ashburn-1,4.041334909698,USD
+2026-08-29,oci,Compute,us-ashburn-1,143.18207082987,USD
+2026-08-27,oci,Compute,us-ashburn-1,157.258070829869,USD
+2026-08-02,oci,Logging,us-ashburn-1,0.032863819642,USD
+2026-08-22,oci,Compute,us-ashburn-1,157.258070829864,USD
+2026-08-22,oci,Virtual Cloud Network,us-ashburn-1,0.047490156008,USD
+2026-08-20,oci,Logging,us-ashburn-1,0.245140431156,USD
+2026-08-03,oci,Compute,us-ashburn-1,157.870070829872,USD
+2026-08-05,oci,Functions,us-ashburn-1,0,USD
+2026-08-12,oci,API Gateway,us-ashburn-1,0.00305775,USD
+2026-08-21,oci,Object Storage,us-ashburn-1,4.243703181214,USD
+2026-08-09,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-17,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-30,oci,Object Storage,us-ashburn-1,5.255267437438,USD
+2026-08-09,oci,Object Storage,us-ashburn-1,2.650291215133,USD
+2026-08-25,oci,Object Storage,us-ashburn-1,13.238071075262,USD
+2026-08-26,oci,API Gateway,us-ashburn-1,0.00442575,USD
+2026-08-19,oci,Logging,us-ashburn-1,0.251940373651,USD
+2026-08-03,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-30,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-24,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-02,oci,API Gateway,us-ashburn-1,0.005247,USD
+2026-08-01,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-15,oci,Functions,us-ashburn-1,0,USD
+2026-08-13,oci,Functions,us-ashburn-1,0,USD
+2026-08-26,oci,Email Delivery,us-ashburn-1,0.00325125,USD
+2026-08-13,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-19,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-25,oci,Email Delivery,us-ashburn-1,0.00312375,USD
+2026-08-25,oci,Compute,us-ashburn-1,157.258070829867,USD
+2026-08-14,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-12,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-01,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-05,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-15,oci,Compute,us-ashburn-1,157.870070829865,USD
+2026-08-07,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-30,oci,Virtual Cloud Network,us-ashburn-1,0.084109029779,USD
+2026-08-02,oci,Compute,us-ashburn-1,157.870070829869,USD
+2026-08-16,oci,Compute,us-ashburn-1,157.870070829865,USD
+2026-08-01,oci,Logging,us-ashburn-1,0,USD
+2026-08-17,oci,Virtual Cloud Network,us-ashburn-1,0.085444985358,USD
+2026-08-20,oci,Object Storage,us-ashburn-1,3.709724543242,USD
+2026-08-25,oci,Logging,us-ashburn-1,0.261561832704,USD
+2026-08-08,oci,Functions,us-ashburn-1,0,USD
+2026-08-14,oci,API Gateway,us-ashburn-1,0.004302,USD
+2026-08-10,oci,API Gateway,us-ashburn-1,0.002853,USD
+2026-08-20,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-05,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-10,oci,Object Storage,us-ashburn-1,2.651999950711,USD
+2026-08-04,oci,Logging,us-ashburn-1,0.208640067959,USD
+2026-08-06,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-29,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-20,oci,Email Delivery,us-ashburn-1,0.0057375,USD
+2026-08-16,oci,API Gateway,us-ashburn-1,0.005274,USD
+2026-08-04,oci,Email Delivery,us-ashburn-1,0,USD
+2026-08-23,oci,Functions,us-ashburn-1,0,USD
+2026-08-19,oci,Email Delivery,us-ashburn-1,0.01255875,USD
+2026-08-06,oci,Object Storage,us-ashburn-1,3.391093207031,USD
+2026-08-06,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-11,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-28,oci,Compute,us-ashburn-1,155.150319163203,USD
+2026-08-08,oci,Virtual Cloud Network,us-ashburn-1,0,USD
+2026-08-22,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-07,oci,Compute,us-ashburn-1,157.870070829871,USD
+2026-08-01,oci,Functions,us-ashburn-1,0,USD
+2026-08-25,oci,Block Storage,us-ashburn-1,125.516346774264,USD
+2026-08-09,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-27,oci,Object Storage,us-ashburn-1,11.73003585871,USD
+2026-08-06,oci,Compute,us-ashburn-1,157.870070829866,USD
+2026-08-18,oci,Compute,us-ashburn-1,157.258070829866,USD
+2026-08-05,oci,Block Storage,us-ashburn-1,125.753250000072,USD
+2026-08-04,oci,Object Storage,us-ashburn-1,4.095901990572,USD
+2026-08-06,oci,Logging,us-ashburn-1,0.232328009354,USD
+2026-08-17,oci,Object Storage,us-ashburn-1,4.904902726006,USD
+2026-08-22,oci,Logging,us-ashburn-1,0.229227498544,USD
+2026-08-26,oci,Object Storage,us-ashburn-1,11.836502317999,USD
+2026-08-09,oci,Logging,us-ashburn-1,0.24053757105,USD
+2026-08-21,oci,API Gateway,us-ashburn-1,0.006453,USD
+2026-08-26,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-23,oci,Logging,us-ashburn-1,0.224274368857,USD
+2026-08-22,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-27,oci,Logging,us-ashburn-1,0.277297611458,USD
+2026-08-27,oci,Functions,us-ashburn-1,0,USD
+2026-08-06,oci,API Gateway,us-ashburn-1,0.0026595,USD
+2026-08-25,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-07,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-18,oci,Telemetry,us-ashburn-1,0,USD
+2026-08-30,oci,Logging,us-ashburn-1,0.278346389869,USD
+2026-08-24,oci,Email Delivery,us-ashburn-1,0.00306,USD
+2026-08-07,oci,Email Delivery,us-ashburn-1,0,USD

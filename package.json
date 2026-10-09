@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cost-explorer": "^3.1148.0",
+    "@aws-sdk/client-s3": "^3.1148.0",
     "commander": "^15.0.0",
     "csv-stringify": "^6.9.0",
     "dotenv": "^18.0.6",
@@ -61,7 +62,8 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
     "oci-common": "^2.142.2",
-    "oci-usageapi": "^2.142.2"
+    "oci-usageapi": "^2.142.2",
+    "pdfkit": "^0.20.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
@@ -69,6 +71,7 @@
     "@types/node": "^22.10.2",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
+    "@types/pdfkit": "^0.17.6",
     "vitest": "^5.0.3"
   }
 }

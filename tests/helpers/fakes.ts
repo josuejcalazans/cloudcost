@@ -3,7 +3,7 @@ import type {
   CostProvider,
   CostQuery,
 } from '../../src/application/ports/cost-provider.ts';
-import type { ReportExporter } from '../../src/application/ports/exporter.ts';
+import type { ExportContext, ReportExporter } from '../../src/application/ports/exporter.ts';
 import type {
   Notification,
   Notifier,
@@ -48,6 +48,7 @@ export class MemoryCache implements CachePort {
 
 export class FakeExporter implements ReportExporter {
   readonly exported: CostReport[] = [];
+  readonly contexts: (ExportContext | undefined)[] = [];
   readonly format: ReportExporter['format'];
   readonly mimeType: string;
   readonly extension: string;
@@ -62,8 +63,12 @@ export class FakeExporter implements ReportExporter {
     this.extension = extension;
   }
 
-  async export(report: CostReport): Promise<Buffer> {
+  async export(
+    report: CostReport,
+    context?: ExportContext,
+  ): Promise<Buffer> {
     this.exported.push(report);
+    this.contexts.push(context);
     return Buffer.from(`${this.format}:${report.total}`);
   }
 }

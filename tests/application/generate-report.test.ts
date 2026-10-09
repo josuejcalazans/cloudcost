@@ -87,8 +87,50 @@ describe('GenerateReport', () => {
       generateReport.execute({
         provider: 'oci',
         range,
-        format: 'pdf' as never,
+        format: 'yaml' as never,
       }),
     ).rejects.toThrow(UnsupportedFormatError);
+  });
+
+  it('fetches and attaches a comparison period when requested', async () => {
+    const { generateReport, provider } = setup();
+    const compareRange = DateRange.of('2026-09-01', '2026-09-05');
+
+    const generated = await generateReport.execute({
+      provider: 'oci',
+      range,
+      compareRange,
+    });
+
+    expect(provider.calls).toHaveLength(2);
+    expect(provider.calls[1]?.range.from).toBe('2026-09-01');
+    expect(provider.calls[1]?.range.to).toBe('2026-09-05');
+    expect(generated.comparison?.total).toBe(4);
+    expect(generated.comparison?.range.from).toBe('2026-09-01');
+  });
+
+  it('passes the title and comparison to the exporter context', async () => {
+    const { generateReport, json } = setup();
+    const compareRange = DateRange.of('2026-09-01', '2026-09-05');
+
+    await generateReport.execute({
+      provider: 'oci',
+      range,
+      title: 'October optimization',
+      compareRange,
+    });
+
+    expect(json.contexts).toHaveLength(1);
+    expect(json.contexts[0]?.title).toBe('October optimization');
+    expect(json.contexts[0]?.comparison?.total).toBe(4);
+  });
+
+  it('omits the comparison from the context when not requested', async () => {
+    const { generateReport, json } = setup();
+
+    await generateReport.execute({ provider: 'oci', range });
+
+    expect(json.contexts[0]?.comparison).toBeUndefined();
+    expect(json.contexts[0]?.title).toBeUndefined();
   });
 });
