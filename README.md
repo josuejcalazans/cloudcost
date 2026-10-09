@@ -3,26 +3,34 @@
 [![CI](https://github.com/josuejcalazans/cloudcost/actions/workflows/ci.yml/badge.svg)](https://github.com/josuejcalazans/cloudcost/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/tests-116%20passing-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-144%20passing-brightgreen.svg)](#testing)
 
-**Multi-cloud cost intelligence for OCI and AWS** — one CLI, one HTTP API, four
-export formats (JSON / CSV / XLSX / ZIP) and scheduled email reports, built as
-a reusable library with a test-driven, hexagonal architecture.
+**Multi-cloud cost intelligence for OCI and AWS** — one CLI, one HTTP API, five
+export formats (JSON / CSV / XLSX / ZIP / PDF) and scheduled email reports,
+built as a reusable library with a test-driven, hexagonal architecture.
 
 > Runs directly on **Node ≥ 24** — no build step. The whole codebase is
 > erasable-only TypeScript executed natively by Node's type stripping.
 
 ```bash
 node src/cli.ts costs --provider oci --from 2026-10-01 --to 2026-11-01 \
-  --group-by service --format xlsx --out report.xlsx
+  --group-by service --format pdf --title "October report" \
+  --compare-from 2026-09-01 --compare-to 2026-10-01 --upload
 ```
 
 ## Features
 
 - **Multi-cloud**: Oracle Cloud (Usage API — same data as the console's Cost
   Analysis) and AWS (Cost Explorer `GetCostAndUsage`), behind one port.
-- **Four formats**: `json`, `csv`, `xlsx` (Summary + Records sheets) and `zip`
-  bundling all three artifacts.
+- **Five formats**: `json`, `csv`, `xlsx` (Summary + Records sheets), `zip`
+  bundling all three artifacts and `pdf` — a styled report with KPI boxes, a
+  daily bar chart, grouped tables and page footers.
+- **Period comparison**: `--compare-from` / `--compare-to` fetches a second
+  window and renders totals, delta and percentage change side by side
+  (embedded in `pdf` and `json` output).
+- **Object Storage upload**: `--upload` publishes the generated report to
+  OCI Object Storage (S3-compatible endpoint) under a configurable
+  `--prefix` and prints the object URL.
 - **CLI** for ad-hoc reports, **HTTP API** for dashboards, **cron scheduler**
   for weekly email digests — all sharing the same use cases.
 - **Email reports** with the file attached and top-5 cost groups in the body.
@@ -56,7 +64,7 @@ Install globally with `npm link` to get a `cloudcost` binary anywhere.
 
 | Command | Purpose |
 |---|---|
-| `cloudcost costs --provider oci --from D --to D [--group-by service\|region\|day\|provider] [--format json\|csv\|xlsx\|zip] [--out file]` | Fetch costs and export a report (stdout when `--out` is omitted) |
+| `cloudcost costs --provider oci --from D --to D [--group-by service\|region\|day\|provider] [--format json\|csv\|xlsx\|zip\|pdf] [--out file] [--title text] [--compare-from D --compare-to D] [--upload] [--prefix p]` | Fetch costs and export a report (stdout when `--out` is omitted; `--upload` stores it in Object Storage and prints the URL) |
 | `cloudcost report email --provider oci --from D --to D [--recipient a@b.c ...] [--format csv]` | Generate and email a report |
 | `cloudcost schedule [--cron "0 7 * * 1"] [--timezone America/Sao_Paulo] [--days 30]` | Run recurring email reports |
 | `cloudcost serve [--port 3000]` | Start the HTTP API |
@@ -100,8 +108,8 @@ console.log(report.total, report.groups[0]);
 ```
 
 Every dependency is injectable (`providers`, `cache`, `exporters`,
-`notifier`), so tests and custom integrations plug in without touching the
-core.
+`notifier`, `storage`), so tests and custom integrations plug in without
+touching the core.
 
 ## Architecture
 
@@ -116,8 +124,8 @@ graph TD
     CRON[Scheduler · node-cron]
   end
   subgraph Application
-    UC["Use cases: GetCosts · GenerateReport · SendReport"]
-    PORTS["Ports: CostProvider · ReportExporter · Notifier · CachePort · SchedulerPort"]
+    UC["Use cases: GetCosts · GenerateReport · SendReport · UploadReport"]
+    PORTS["Ports: CostProvider · ReportExporter · Notifier · CachePort · SchedulerPort · StoragePort"]
   end
   subgraph Domain
     DOM["Money · DateRange · CostRecord · CostReport"]
@@ -125,7 +133,8 @@ graph TD
   subgraph Infrastructure
     OCI["OCI Usage API"]
     AWS["AWS Cost Explorer"]
-    EXP["JSON · CSV · XLSX · ZIP"]
+    EXP["JSON · CSV · XLSX · ZIP · PDF"]
+    S3["OCI Object Storage"]
     SMTP["SMTP · nodemailer"]
     MEM["MemoryCache · TTL"]
   end
@@ -138,6 +147,7 @@ graph TD
   PORTS -. implemented by .-> AWS
   PORTS -. implemented by .-> EXP
   PORTS -. implemented by .-> SMTP
+  PORTS -. implemented by .-> S3
   PORTS -. implemented by .-> MEM
 ```
 
@@ -174,6 +184,7 @@ Environment variables (see [.env.example](./.env.example)):
 |---|---|---|
 | `OCI_TENANCY_ID` / `OCI_USER_ID` / `OCI_FINGERPRINT` / `OCI_PRIVATE_KEY` (or `OCI_PRIVATE_KEY_PATH`) / `OCI_REGION` | — / `us-ashburn-1` | OCI env auth, same variables as springbot/www (aliases: `OCI_TENANCY_OCID`, `OCI_USER_OCID`) |
 | `OCI_CONFIG_FILE` / `OCI_PROFILE` | `~/.oci/config` / `DEFAULT` | config-file fallback, used only when the env variables above are empty |
+| `OCI_NAMESPACE` / `OCI_BUCKET` / `OCI_ACCESS_KEY_ID` / `OCI_SECRET_ACCESS_KEY` | — | Object Storage uploads (`--upload`); `OCI_REGION` defaults to `us-ashburn-1` |
 | `AWS_REGION` / `AWS_PROFILE` | `us-east-1` / `default` | AWS Cost Explorer |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` | — | outbound mail |
 | `MAIL_FROM` / `MAIL_TO` | `cloudcost@example.com` / — | default sender and recipients (comma-separated list) |
@@ -183,7 +194,7 @@ Environment variables (see [.env.example](./.env.example)):
 
 ## Testing
 
-116 tests across 18 files — domain invariants, use cases with fake ports,
+144 tests across 22 files — domain invariants, use cases with fake ports,
 each adapter against fake transports/clients, and the HTTP API exercised
 over a real socket:
 
