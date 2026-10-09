@@ -77,4 +77,34 @@ describe('loadConfig', () => {
       accountIds: ['111', '222'],
     });
   });
+
+  it('provides object storage defaults for an empty environment', () => {
+    const config = loadConfig({});
+
+    expect(config.objectStorage).toEqual({
+      namespace: '',
+      bucket: '',
+      region: 'us-ashburn-1',
+      accessKeyId: '',
+      secretAccessKey: '',
+    });
+  });
+
+  it('reads object storage settings from the environment', () => {
+    const config = loadConfig({
+      OCI_NAMESPACE: 'springbot',
+      OCI_BUCKET: 'reports',
+      OCI_REGION: 'eu-frankfurt-1',
+      OCI_ACCESS_KEY_ID: 'key',
+      OCI_SECRET_ACCESS_KEY: 'secret',
+    });
+
+    expect(config.objectStorage).toEqual({
+      namespace: 'springbot',
+      bucket: 'reports',
+      region: 'eu-frankfurt-1',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+    });
+  });
 });
