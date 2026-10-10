@@ -42,10 +42,12 @@ const QUERY = 'provider=oci&from=2026-10-01&to=2026-10-05';
 describe('HTTP API', () => {
   let server: Server;
   let baseUrl: string;
+  let provider: FakeProvider;
 
   beforeEach(async () => {
-    const { deps } = buildDeps();
-    const app = createApp(deps);
+    const built = buildDeps();
+    provider = built.provider;
+    const app = createApp(built.deps);
     server = app.listen(0);
     await new Promise((resolve) => server.once('listening', resolve));
     const { port } = server.address() as AddressInfo;
@@ -88,7 +90,7 @@ describe('HTTP API', () => {
     );
     const text = await res.text();
     expect(text.split('\n')[0]).toBe(
-      'date,provider,service,region,amount,currency',
+      'date,provider,service,region,sku,amount,currency',
     );
   });
 
@@ -154,16 +156,32 @@ describe('HTTP API', () => {
     expect(body.error).toContain('not configured');
   });
 
-  it('rejects unknown formats and group keys', async () => {
+  it('rejects unknown formats, group keys and granularities', async () => {
     const badFormat = await fetch(
       `${baseUrl}/api/v1/costs?${QUERY}&format=yaml`,
     );
     expect(badFormat.status).toBe(400);
 
     const badGroup = await fetch(
-      `${baseUrl}/api/v1/costs?${QUERY}&group_by=sku`,
+      `${baseUrl}/api/v1/costs?${QUERY}&group_by=billing`,
     );
     expect(badGroup.status).toBe(400);
+
+    const badGranularity = await fetch(
+      `${baseUrl}/api/v1/costs?${QUERY}&granularity=YEARLY`,
+    );
+    expect(badGranularity.status).toBe(400);
+  });
+
+  it('accepts group_by=sku and granularity', async () => {
+    const res = await fetch(
+      `${baseUrl}/api/v1/costs?${QUERY}&group_by=sku&granularity=HOURLY`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(provider.calls).toHaveLength(1);
+    expect(provider.calls[0].granularity).toBe('HOURLY');
+    expect(provider.calls[0].groupBy).toEqual(['service', 'region', 'sku']);
   });
 
   it('sends a report email', async () => {

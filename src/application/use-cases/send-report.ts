@@ -2,6 +2,7 @@ import type { GroupKey } from '../../domain/aggregates/cost-report.ts';
 import type { ProviderId } from '../../domain/entities/cost-record.ts';
 import type { DateRange } from '../../domain/value-objects/date-range.ts';
 import { MissingRecipientsError } from '../errors.ts';
+import type { CostGranularity } from '../ports/cost-provider.ts';
 import type { ReportFormat } from '../ports/exporter.ts';
 import type { Notification, Notifier } from '../ports/notifier.ts';
 import type { GeneratedReport, GenerateReport } from './generate-report.ts';
@@ -10,6 +11,7 @@ export interface SendReportInput {
   provider: ProviderId;
   range: DateRange;
   groupBy?: GroupKey;
+  granularity?: CostGranularity;
   format?: ReportFormat;
   recipients?: string[];
 }

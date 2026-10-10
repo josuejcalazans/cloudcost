@@ -74,6 +74,53 @@ describe('AwsCostProvider', () => {
     ]);
   });
 
+  it('reads keys by index so sku groups stay aligned', async () => {
+    const { client, state } = fakeClient({
+      ResultsByTime: [
+        {
+          TimePeriod: { Start: '2026-10-02', End: '2026-10-03' },
+          Groups: [
+            {
+              Keys: [
+                'Amazon Simple Storage Service',
+                'us-east-1',
+                'DataTransfer-Out-Bytes',
+              ],
+              Metrics: { UnblendedCost: { Amount: '31.26', Unit: 'USD' } },
+            },
+          ],
+        },
+      ],
+    });
+    const provider = new AwsCostProvider(client);
+
+    const records = await provider.fetch({
+      provider: 'aws',
+      range,
+      groupBy: ['service', 'region', 'sku'],
+      granularity: 'MONTHLY',
+    });
+
+    expect(records).toEqual([
+      {
+        provider: 'aws',
+        date: '2026-10-02',
+        service: 'Amazon Simple Storage Service',
+        region: 'us-east-1',
+        sku: 'DataTransfer-Out-Bytes',
+        amount: 31.26,
+        currency: 'USD',
+      },
+    ]);
+    const input = (state.command as { input: Record<string, unknown> }).input;
+    expect(input.Granularity).toBe('MONTHLY');
+    expect(input.GroupBy).toEqual([
+      { Type: 'DIMENSION', Key: 'SERVICE' },
+      { Type: 'DIMENSION', Key: 'REGION' },
+      { Type: 'DIMENSION', Key: 'USAGE_TYPE' },
+    ]);
+  });
+
   it('returns an empty list when there are no results', async () => {
     const { client } = fakeClient({});
     const provider = new AwsCostProvider(client);

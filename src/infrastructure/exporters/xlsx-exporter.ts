@@ -16,6 +16,7 @@ export class XlsxExporter implements ReportExporter {
     summary.addRow(['Range', `${report.range.from}..${report.range.to}`]);
     summary.addRow(['Currency', report.currency]);
     summary.addRow(['Total', report.total]);
+    summary.addRow(['Grouped by', report.groupBy]);
     summary.addRow(['Generated', report.generatedAt]);
     summary.addRow([]);
     summary.addRow(['Group', 'Amount', 'Share']);
@@ -31,6 +32,7 @@ export class XlsxExporter implements ReportExporter {
         record.provider,
         record.service,
         record.region,
+        record.sku ?? '',
         record.amount,
         record.currency,
       ]);
@@ -41,4 +43,12 @@ export class XlsxExporter implements ReportExporter {
   }
 }
 
-const COLUMNS = ['date', 'provider', 'service', 'region', 'amount', 'currency'];
+const COLUMNS = [
+  'date',
+  'provider',
+  'service',
+  'region',
+  'sku',
+  'amount',
+  'currency',
+];

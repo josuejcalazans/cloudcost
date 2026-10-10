@@ -67,9 +67,31 @@ describe('GetCosts', () => {
     expect(oci.calls).toHaveLength(2);
     expect(aws.calls).toHaveLength(1);
     expect([...cache.store.keys()]).toEqual([
-      'costs:oci:2026-10-01..2026-10-05',
-      'costs:aws:2026-10-01..2026-10-05',
-      'costs:oci:2026-09-01..2026-10-01',
+      'costs:oci:2026-10-01..2026-10-05:DAILY:region+service',
+      'costs:aws:2026-10-01..2026-10-05:DAILY:region+service',
+      'costs:oci:2026-09-01..2026-10-01:DAILY:region+service',
+    ]);
+  });
+
+  it('uses a distinct cache entry per granularity and dimensions', async () => {
+    const provider = new FakeProvider('oci', [record()]);
+    const cache = new MemoryCache();
+    const getCosts = new GetCosts(new Map([['oci', provider]]), cache);
+    const range = DateRange.of('2026-10-01', '2026-10-05');
+
+    await getCosts.execute({ provider: 'oci', range });
+    await getCosts.execute({ provider: 'oci', range, granularity: 'HOURLY' });
+    await getCosts.execute({
+      provider: 'oci',
+      range,
+      groupBy: ['service', 'region', 'sku'],
+    });
+
+    expect(provider.calls).toHaveLength(3);
+    expect([...cache.store.keys()]).toEqual([
+      'costs:oci:2026-10-01..2026-10-05:DAILY:region+service',
+      'costs:oci:2026-10-01..2026-10-05:HOURLY:region+service',
+      'costs:oci:2026-10-01..2026-10-05:DAILY:region+service+sku',
     ]);
   });
 

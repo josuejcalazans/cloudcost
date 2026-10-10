@@ -75,7 +75,7 @@ describe('csv exporter', () => {
     const buffer = await csv!.export(report);
     const lines = buffer.toString().trim().split('\n');
 
-    expect(lines[0]).toBe('date,provider,service,region,amount,currency');
+    expect(lines[0]).toBe('date,provider,service,region,sku,amount,currency');
     expect(lines).toHaveLength(3);
     expect(lines[1]).toContain('Object Storage');
   });

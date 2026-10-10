@@ -6,6 +6,7 @@ import {
 import type { ProviderId } from '../../domain/entities/cost-record.ts';
 import type { DateRange } from '../../domain/value-objects/date-range.ts';
 import { UnsupportedFormatError } from '../errors.ts';
+import type { CostDimension, CostGranularity } from '../ports/cost-provider.ts';
 import type { ReportExporter, ReportFormat } from '../ports/exporter.ts';
 import type { GetCosts } from './get-costs.ts';
 
@@ -13,6 +14,7 @@ export interface GenerateReportInput {
   provider: ProviderId;
   range: DateRange;
   groupBy?: GroupKey;
+  granularity?: CostGranularity;
   format?: ReportFormat;
   title?: string;
   compareRange?: DateRange;
@@ -24,6 +26,18 @@ export interface GeneratedReport {
   buffer: Buffer;
   mimeType: string;
   filename: string;
+}
+
+/**
+ * Dimensions the provider must fetch so the requested report grouping
+ * can be built. `service` is always present because every CostRecord
+ * carries a service; `sku` is only requested when it is needed, to keep
+ * the API row count down.
+ */
+function dimensionsFor(groupBy: GroupKey): CostDimension[] {
+  return groupBy === 'sku'
+    ? ['service', 'region', 'sku']
+    : ['service', 'region'];
 }
 
 /**
@@ -53,16 +67,23 @@ export class GenerateReport {
       throw new UnsupportedFormatError(format);
     }
 
-    const records = await this.getCosts.execute({
+    const dimensions = dimensionsFor(groupBy);
+    const fetchQuery = {
       provider: input.provider,
       range: input.range,
-    });
+      groupBy: dimensions,
+      ...(input.granularity !== undefined
+        ? { granularity: input.granularity }
+        : {}),
+    };
+
+    const records = await this.getCosts.execute(fetchQuery);
     const report = buildReport(records, input.range, groupBy);
 
     let comparison: CostReport | undefined;
     if (input.compareRange !== undefined) {
       const compareRecords = await this.getCosts.execute({
-        provider: input.provider,
+        ...fetchQuery,
         range: input.compareRange,
       });
       comparison = buildReport(compareRecords, input.compareRange, groupBy);

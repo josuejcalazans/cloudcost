@@ -9,6 +9,10 @@ import {
   InvalidQueryError,
   ProviderNotConfiguredError,
 } from '../../application/errors.ts';
+import {
+  type CostGranularity,
+  isCostGranularity,
+} from '../../application/ports/cost-provider.ts';
 import { isReportFormat } from '../../application/ports/exporter.ts';
 import type { GenerateReport } from '../../application/use-cases/generate-report.ts';
 import type { SendReport } from '../../application/use-cases/send-report.ts';
@@ -46,6 +50,7 @@ interface ReportQuery {
   provider: ProviderId;
   range: DateRange;
   groupBy: GroupKey;
+  granularity: CostGranularity;
   format: ReturnType<typeof normalizeFormat>;
 }
 
@@ -83,7 +88,14 @@ function parseReportQuery(
   const groupBy = queryString(source.group_by) ?? 'service';
   if (!isGroupKey(groupBy)) {
     throw new InvalidQueryError(
-      `unknown group_by "${groupBy}" (expected service, region, day or provider)`,
+      `unknown group_by "${groupBy}" (expected service, region, sku, day or provider)`,
+    );
+  }
+
+  const granularity = queryString(source.granularity) ?? 'DAILY';
+  if (!isCostGranularity(granularity)) {
+    throw new InvalidQueryError(
+      `unknown granularity "${granularity}" (expected HOURLY, DAILY or MONTHLY)`,
     );
   }
 
@@ -91,6 +103,7 @@ function parseReportQuery(
     provider,
     range: DateRange.of(from, to),
     groupBy,
+    granularity,
     format: normalizeFormat(queryString(source.format), fallbackFormat),
   };
 }

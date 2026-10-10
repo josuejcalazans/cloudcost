@@ -17,6 +17,11 @@ export interface CostRecord {
   /** Amount in major units (e.g. 1.23 USD). */
   amount: number;
   currency: string;
+  /**
+   * Billable line item within a service (OCI `skuName`, AWS usage type).
+   * Present only when the provider was asked to group by SKU.
+   */
+  sku?: string;
   resourceId?: string;
 }
 
@@ -27,6 +32,7 @@ export interface CostRecordInput {
   amount: number;
   region?: string;
   currency?: string;
+  sku?: string;
   resourceId?: string;
 }
 
@@ -62,6 +68,9 @@ export function createCostRecord(input: CostRecordInput): CostRecord {
     amount: input.amount,
     currency: input.currency?.trim().toUpperCase() || 'USD',
   };
+  if (input.sku !== undefined && input.sku !== '') {
+    record.sku = input.sku.trim();
+  }
   if (input.resourceId !== undefined && input.resourceId !== '') {
     record.resourceId = input.resourceId;
   }

@@ -3,7 +3,13 @@ import { MixedCurrencyError, UnsupportedGroupKeyError } from '../errors.ts';
 import type { DateRange } from '../value-objects/date-range.ts';
 import { Money } from '../value-objects/money.ts';
 
-export const GROUP_KEYS = ['service', 'region', 'day', 'provider'] as const;
+export const GROUP_KEYS = [
+  'service',
+  'region',
+  'sku',
+  'day',
+  'provider',
+] as const;
 
 export type GroupKey = (typeof GROUP_KEYS)[number];
 
@@ -35,6 +41,8 @@ function keyOf(record: CostRecord, groupBy: GroupKey): string {
       return record.service;
     case 'region':
       return record.region;
+    case 'sku':
+      return record.sku ?? 'Other';
     case 'day':
       return record.date;
     case 'provider':

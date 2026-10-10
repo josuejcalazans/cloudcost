@@ -95,9 +95,27 @@ describe('buildReport', () => {
   });
 
   it('rejects unsupported group keys', () => {
-    expect(() => buildReport([record()], range, 'sku' as never)).toThrow(
+    expect(() => buildReport([record()], range, 'billing' as never)).toThrow(
       UnsupportedGroupKeyError,
     );
+  });
+
+  it('groups by sku, falling back to Other when absent', () => {
+    const report = buildReport(
+      [
+        record({ amount: 2, sku: 'Object Storage - Storage' }),
+        record({ amount: 3, sku: 'Object Storage - Requests' }),
+        record({ amount: 5 }),
+      ],
+      range,
+      'sku',
+    );
+
+    expect(report.groups).toEqual([
+      { key: 'Other', amount: 5, share: 0.5 },
+      { key: 'Object Storage - Requests', amount: 3, share: 0.3 },
+      { key: 'Object Storage - Storage', amount: 2, share: 0.2 },
+    ]);
   });
 
   it('rejects mixed currencies', () => {

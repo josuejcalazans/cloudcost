@@ -1,6 +1,9 @@
-import type {
-  CostProvider,
-  CostQuery,
+import {
+  type CostDimension,
+  type CostGranularity,
+  type CostProvider,
+  type CostQuery,
+  DEFAULT_COST_DIMENSIONS,
 } from '../../../application/ports/cost-provider.ts';
 import {
   type CostRecord,
@@ -11,6 +14,7 @@ export interface OciUsageItem {
   timeUsageStarted?: string | Date | null;
   service?: string | null;
   region?: string | null;
+  skuName?: string | null;
   computedAmount?: number | string | null;
   currency?: string | null;
   resourceId?: string | null;
@@ -21,6 +25,13 @@ export interface UsageApiClientLike {
     requestSummarizedUsagesDetails: Record<string, unknown>;
   }): Promise<{ usageAggregation?: { items?: OciUsageItem[] } }>;
 }
+
+/** Maps provider-neutral dimensions to OCI Usage API `groupBy` values. */
+const OCI_DIMENSIONS: Readonly<Record<CostDimension, string>> = {
+  service: 'service',
+  region: 'region',
+  sku: 'skuName',
+};
 
 function toIsoDate(
   value: string | Date | null | undefined,
@@ -55,13 +66,16 @@ export class OciCostProvider implements CostProvider {
 
   async fetch(query: CostQuery): Promise<CostRecord[]> {
     const { start, end } = query.range.utcBounds();
+    const granularity: CostGranularity = query.granularity ?? 'DAILY';
+    const dimensions =
+      query.groupBy ?? (DEFAULT_COST_DIMENSIONS as readonly CostDimension[]);
 
     const response = await this.client.requestSummarizedUsages({
       requestSummarizedUsagesDetails: {
         tenantId: this.tenantId,
-        granularity: 'DAILY',
+        granularity,
         queryType: 'COST',
-        groupBy: ['service', 'region'],
+        groupBy: dimensions.map((dimension) => OCI_DIMENSIONS[dimension]),
         timeUsageStarted: start,
         timeUsageEnded: end,
       },
@@ -84,6 +98,7 @@ export class OciCostProvider implements CostProvider {
             region: item.region || 'global',
             amount,
             currency: item.currency || 'USD',
+            sku: item.skuName || undefined,
             resourceId: item.resourceId || undefined,
           }),
         );

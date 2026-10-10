@@ -2,9 +2,12 @@ import {
   GetCostAndUsageCommand,
   type GetCostAndUsageResponse,
 } from '@aws-sdk/client-cost-explorer';
-import type {
-  CostProvider,
-  CostQuery,
+import {
+  type CostDimension,
+  type CostGranularity,
+  type CostProvider,
+  type CostQuery,
+  DEFAULT_COST_DIMENSIONS,
 } from '../../../application/ports/cost-provider.ts';
 import {
   type CostRecord,
@@ -14,6 +17,13 @@ import {
 export interface CostExplorerLike {
   send(command: GetCostAndUsageCommand): Promise<GetCostAndUsageResponse>;
 }
+
+/** Maps provider-neutral dimensions to Cost Explorer `GroupBy` keys. */
+const AWS_DIMENSIONS: Readonly<Record<CostDimension, string>> = {
+  service: 'SERVICE',
+  region: 'REGION',
+  sku: 'USAGE_TYPE',
+};
 
 /**
  * AWS Cost Explorer adapter (GetCostAndUsage). Rows that cannot be
@@ -32,14 +42,18 @@ export class AwsCostProvider implements CostProvider {
   }
 
   async fetch(query: CostQuery): Promise<CostRecord[]> {
+    const granularity: CostGranularity = query.granularity ?? 'DAILY';
+    const dimensions =
+      query.groupBy ?? (DEFAULT_COST_DIMENSIONS as readonly CostDimension[]);
+
     const command = new GetCostAndUsageCommand({
       TimePeriod: { Start: query.range.from, End: query.range.to },
-      Granularity: 'DAILY',
+      Granularity: granularity,
       Metrics: ['UnblendedCost'],
-      GroupBy: [
-        { Type: 'DIMENSION', Key: 'SERVICE' },
-        { Type: 'DIMENSION', Key: 'REGION' },
-      ],
+      GroupBy: dimensions.map((dimension) => ({
+        Type: 'DIMENSION' as const,
+        Key: AWS_DIMENSIONS[dimension],
+      })),
     });
 
     const response = await this.client.send(command);
@@ -57,13 +71,18 @@ export class AwsCostProvider implements CostProvider {
         if (!Number.isFinite(amount)) {
           continue;
         }
+        // `keys` is ordered exactly as `dimensions`, so read them by index.
+        const byDimension = new Map(
+          dimensions.map((dimension, index) => [dimension, keys[index]]),
+        );
         try {
           records.push(
             createCostRecord({
               provider: 'aws',
               date,
-              service: keys[0] || 'Other',
-              region: keys[1] || 'global',
+              service: byDimension.get('service') || 'Other',
+              region: byDimension.get('region') || 'global',
+              sku: byDimension.get('sku') || undefined,
               amount,
               currency: metric?.Unit || 'USD',
             }),

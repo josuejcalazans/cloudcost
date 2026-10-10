@@ -7,6 +7,7 @@ const COLUMNS = [
   'provider',
   'service',
   'region',
+  'sku',
   'amount',
   'currency',
 ] as const;
@@ -22,6 +23,7 @@ export class CsvExporter implements ReportExporter {
       provider: record.provider,
       service: record.service,
       region: record.region,
+      sku: record.sku ?? '',
       amount: record.amount,
       currency: record.currency,
     }));

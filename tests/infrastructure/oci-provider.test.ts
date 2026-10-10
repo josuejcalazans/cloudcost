@@ -77,6 +77,50 @@ describe('OciCostProvider', () => {
     );
   });
 
+  it('maps skuName onto the record and into the groupBy', async () => {
+    const { client, state } = fakeClient({
+      usageAggregation: {
+        items: [
+          {
+            timeUsageStarted: '2026-10-02T00:00:00.000Z',
+            service: 'Object Storage',
+            region: 'us-ashburn-1',
+            skuName: 'Object Storage - Outbound Data Transfer Zone 1',
+            computedAmount: 31.26,
+            currency: 'USD',
+          },
+        ],
+      },
+    });
+    const provider = new OciCostProvider(client, 'ocid1.tenancy.oc1..tenant');
+
+    const records = await provider.fetch({
+      provider: 'oci',
+      range,
+      groupBy: ['service', 'region', 'sku'],
+    });
+
+    expect(records[0]?.sku).toBe(
+      'Object Storage - Outbound Data Transfer Zone 1',
+    );
+    const details = (
+      state.args as { requestSummarizedUsagesDetails: Record<string, unknown> }
+    ).requestSummarizedUsagesDetails;
+    expect(details.groupBy).toEqual(['service', 'region', 'skuName']);
+  });
+
+  it('honours a non-default granularity', async () => {
+    const { client, state } = fakeClient({ usageAggregation: { items: [] } });
+    const provider = new OciCostProvider(client, 'ocid1.tenancy.oc1..tenant');
+
+    await provider.fetch({ provider: 'oci', range, granularity: 'MONTHLY' });
+
+    const details = (
+      state.args as { requestSummarizedUsagesDetails: Record<string, unknown> }
+    ).requestSummarizedUsagesDetails;
+    expect(details.granularity).toBe('MONTHLY');
+  });
+
   it('returns an empty list when the tenancy has no usage', async () => {
     const { client } = fakeClient({});
     const provider = new OciCostProvider(client, 'ocid1.tenancy.oc1..tenant');

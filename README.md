@@ -3,7 +3,7 @@
 [![CI](https://github.com/josuejcalazans/cloudcost/actions/workflows/ci.yml/badge.svg)](https://github.com/josuejcalazans/cloudcost/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/tests-144%20passing-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-151%20passing-brightgreen.svg)](#testing)
 
 **Multi-cloud cost intelligence for OCI and AWS** — one CLI, one HTTP API, five
 export formats (JSON / CSV / XLSX / ZIP / PDF) and scheduled email reports,
@@ -64,21 +64,48 @@ Install globally with `npm link` to get a `cloudcost` binary anywhere.
 
 | Command | Purpose |
 |---|---|
-| `cloudcost costs --provider oci --from D --to D [--group-by service\|region\|day\|provider] [--format json\|csv\|xlsx\|zip\|pdf] [--out file] [--title text] [--compare-from D --compare-to D] [--upload] [--prefix p]` | Fetch costs and export a report (stdout when `--out` is omitted; `--upload` stores it in Object Storage and prints the URL) |
-| `cloudcost report email --provider oci --from D --to D [--recipient a@b.c ...] [--format csv]` | Generate and email a report |
+| `cloudcost costs --provider oci --from D --to D [--group-by service\|region\|sku\|day\|provider] [--granularity HOURLY\|DAILY\|MONTHLY] [--format json\|csv\|xlsx\|zip\|pdf] [--out file] [--title text] [--compare-from D --compare-to D] [--upload] [--prefix p]` | Fetch costs and export a report (stdout when `--out` is omitted; `--upload` stores it in Object Storage and prints the URL) |
+| `cloudcost report email --provider oci --from D --to D [--recipient a@b.c ...] [--group-by service\|region\|sku\|day\|provider] [--granularity HOURLY\|DAILY\|MONTHLY] [--format csv]` | Generate and email a report |
 | `cloudcost schedule [--cron "0 7 * * 1"] [--timezone America/Sao_Paulo] [--days 30]` | Run recurring email reports |
 | `cloudcost serve [--port 3000]` | Start the HTTP API |
 
 Dates are `YYYY-MM-DD`, start inclusive / end exclusive (exactly how usage
 APIs bill).
 
+### Grouping and granularity
+
+`--group-by` picks the dimension the report rolls up by:
+
+| Value | Meaning |
+|---|---|
+| `service` | Cloud service (Object Storage, Block Storage, Compute, ...) — the default |
+| `region` | Cloud region |
+| `sku` | Billable line item inside a service — OCI `skuName`, AWS usage type |
+| `day` | One bucket per usage day |
+| `provider` | One bucket per cloud (useful across OCI + AWS) |
+
+`--granularity` is the roll-up window sent to the provider API:
+`HOURLY`, `DAILY` (default) or `MONTHLY`. Note that the OCI Usage API
+rejects hourly ranges longer than 36 hours.
+
+Use `--group-by sku` to see cost that service-level reports hide. A
+service-level report shows a single `Object Storage` line; the SKU
+breakdown separates storage, requests, archive and — importantly —
+**outbound data transfer**, which is the line that exposes bulk
+downloads:
+
+```
+cloudcost costs --provider oci --from 2026-10-01 --to 2026-10-11 \
+  --group-by sku --format pdf --title "October by SKU" --out october.pdf
+```
+
 ## HTTP API
 
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/health` | Liveness probe (never requires the API key) |
-| `GET` | `/api/v1/costs?provider=oci&from=2026-10-01&to=2026-11-01&group_by=service&format=csv` | Cost report in the requested format |
-| `POST` | `/api/v1/reports/email` | Body `{ "provider", "from", "to", "group_by?", "format?", "recipients?" }` — sends the report by email |
+| `GET` | `/api/v1/costs?provider=oci&from=2026-10-01&to=2026-11-01&group_by=service&granularity=DAILY&format=csv` | Cost report in the requested format (`group_by` accepts `service\|region\|sku\|day\|provider`, `granularity` accepts `HOURLY\|DAILY\|MONTHLY`) |
+| `POST` | `/api/v1/reports/email` | Body `{ "provider", "from", "to", "group_by?", "granularity?", "format?", "recipients?" }` — sends the report by email |
 
 Responses carry `Content-Type` and `Content-Disposition` headers, so the
 browser downloads the file directly. Errors are JSON: `{ "error": "..." }`
@@ -194,7 +221,7 @@ Environment variables (see [.env.example](./.env.example)):
 
 ## Testing
 
-144 tests across 22 files — domain invariants, use cases with fake ports,
+151 tests across 22 files — domain invariants, use cases with fake ports,
 each adapter against fake transports/clients, and the HTTP API exercised
 over a real socket:
 

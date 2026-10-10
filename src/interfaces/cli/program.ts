@@ -1,4 +1,8 @@
 import { Command } from 'commander';
+import {
+  type CostGranularity,
+  isCostGranularity,
+} from '../../application/ports/cost-provider.ts';
 import { isReportFormat } from '../../application/ports/exporter.ts';
 import type {
   GeneratedReport,
@@ -45,7 +49,16 @@ function requireProvider(value: string): ProviderId {
 function requireGroupKey(value: string): GroupKey {
   if (!isGroupKey(value)) {
     throw new Error(
-      `unknown group_by "${value}" (expected service, region, day or provider)`,
+      `unknown group_by "${value}" (expected service, region, sku, day or provider)`,
+    );
+  }
+  return value;
+}
+
+function requireGranularity(value: string): CostGranularity {
+  if (!isCostGranularity(value)) {
+    throw new Error(
+      `unknown granularity "${value}" (expected HOURLY, DAILY or MONTHLY)`,
     );
   }
   return value;
@@ -101,7 +114,16 @@ export function createProgram(deps: CliDeps): Command {
     .requiredOption('--provider <id>', 'cloud provider: oci or aws')
     .requiredOption('--from <date>', 'start date, YYYY-MM-DD (inclusive)')
     .requiredOption('--to <date>', 'end date, YYYY-MM-DD (exclusive)')
-    .option('--group-by <key>', 'service | region | day | provider', 'service')
+    .option(
+      '--group-by <key>',
+      'service | region | sku | day | provider',
+      'service',
+    )
+    .option(
+      '--granularity <window>',
+      'HOURLY | DAILY | MONTHLY roll-up passed to the provider',
+      'DAILY',
+    )
     .option('--format <format>', 'json | csv | xlsx | zip | pdf', 'json')
     .option('--out <file>', 'write the report to a file instead of stdout')
     .option('--title <text>', 'report title rendered by rich formats')
@@ -128,6 +150,7 @@ export function createProgram(deps: CliDeps): Command {
         provider: requireProvider(options.provider as string),
         range: DateRange.of(options.from as string, options.to as string),
         groupBy: requireGroupKey(options.groupBy as string),
+        granularity: requireGranularity(options.granularity as string),
         format: requireFormat(options.format as string),
         ...(options.title !== undefined
           ? { title: options.title as string }
@@ -163,7 +186,16 @@ export function createProgram(deps: CliDeps): Command {
     .requiredOption('--provider <id>', 'cloud provider: oci or aws')
     .requiredOption('--from <date>', 'start date, YYYY-MM-DD (inclusive)')
     .requiredOption('--to <date>', 'end date, YYYY-MM-DD (exclusive)')
-    .option('--group-by <key>', 'service | region | day | provider', 'service')
+    .option(
+      '--group-by <key>',
+      'service | region | sku | day | provider',
+      'service',
+    )
+    .option(
+      '--granularity <window>',
+      'HOURLY | DAILY | MONTHLY roll-up passed to the provider',
+      'DAILY',
+    )
     .option('--format <format>', 'json | csv | xlsx | zip | pdf', 'csv')
     .option(
       '--recipient <email>',
@@ -177,6 +209,7 @@ export function createProgram(deps: CliDeps): Command {
         provider: requireProvider(options.provider as string),
         range: DateRange.of(options.from as string, options.to as string),
         groupBy: requireGroupKey(options.groupBy as string),
+        granularity: requireGranularity(options.granularity as string),
         format: requireFormat(options.format as string),
         ...(recipients.length > 0 ? { recipients } : {}),
       });
