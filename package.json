@@ -61,6 +61,7 @@
     "jszip": "^3.10.1",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
+    "oci-audit": "^2.142.2",
     "oci-common": "^2.142.2",
     "oci-usageapi": "^2.142.2",
     "pdfkit": "^0.20.2"

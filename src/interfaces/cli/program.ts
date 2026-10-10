@@ -8,6 +8,10 @@ import type {
   GeneratedReport,
   GenerateReportInput,
 } from '../../application/use-cases/generate-report.ts';
+import type {
+  SearchAuditInput,
+  SearchAuditResult,
+} from '../../application/use-cases/search-audit.ts';
 import type { SendReportInput } from '../../application/use-cases/send-report.ts';
 import type {
   UploadedReport,
@@ -17,6 +21,7 @@ import {
   type GroupKey,
   isGroupKey,
 } from '../../domain/aggregates/cost-report.ts';
+import type { AuditEvent } from '../../domain/entities/audit-event.ts';
 import {
   isProviderId,
   type ProviderId,
@@ -27,6 +32,7 @@ export interface CliDeps {
   generateReport(input: GenerateReportInput): Promise<GeneratedReport>;
   sendReportEmail(input: SendReportInput): Promise<GeneratedReport>;
   uploadReport(input: UploadReportInput): Promise<UploadedReport>;
+  searchAudit(input: SearchAuditInput): Promise<SearchAuditResult>;
   startServer(port?: number): void;
   scheduleReports(options: {
     cron: string;
@@ -36,6 +42,8 @@ export interface CliDeps {
   }): void;
   writeFile(path: string, buffer: Buffer): void;
   print(text: string): void;
+  /** Diagnostics that must not corrupt machine-readable stdout. */
+  warn(text: string): void;
   printBuffer(buffer: Buffer): void;
 }
 
@@ -239,6 +247,60 @@ export function createProgram(deps: CliDeps): Command {
     });
 
   program
+    .command('audit')
+    .description('search the OCI audit trail: who called what, and when')
+    .requiredOption('--from <timestamp>', 'start, ISO 8601 or YYYY-MM-DD (UTC)')
+    .requiredOption('--to <timestamp>', 'end, ISO 8601 or YYYY-MM-DD (UTC)')
+    .option(
+      '--compartment <ocid>',
+      'compartment OCID (defaults to the tenancy)',
+    )
+    .option('--operation <name>', 'filter by operation, e.g. GetObject')
+    .option('--service <name>', 'filter by service, e.g. ObjectStorage')
+    .option('--principal <text>', 'substring match on the caller identity')
+    .option('--limit <n>', 'maximum rows returned', parseIntOption, 1000)
+    .option('--format <format>', 'text | json | csv', 'text')
+    .action(async (options: Record<string, string | number>) => {
+      const format = String(options.format);
+      if (format !== 'text' && format !== 'json' && format !== 'csv') {
+        throw new Error(
+          `unknown format "${format}" (expected text, json or csv)`,
+        );
+      }
+      const { events, truncated, warning } = await deps.searchAudit({
+        from: options.from as string,
+        to: options.to as string,
+        ...(options.compartment !== undefined
+          ? { compartmentId: options.compartment as string }
+          : {}),
+        ...(options.operation !== undefined
+          ? { operation: options.operation as string }
+          : {}),
+        ...(options.service !== undefined
+          ? { service: options.service as string }
+          : {}),
+        ...(options.principal !== undefined
+          ? { principal: options.principal as string }
+          : {}),
+        limit: options.limit as number,
+      });
+      deps.print(renderAudit(events, format));
+      if (warning !== undefined) {
+        deps.warn(`\nwarning: ${warning}`);
+      }
+      if (truncated) {
+        deps.warn(
+          `\nwarning: hit the row limit (${options.limit}); narrow --from/--to or add filters`,
+        );
+      }
+      if (events.length === 0) {
+        deps.warn(
+          '\nnote: an empty result on a publicly readable bucket is expected — anonymous reads are not audited',
+        );
+      }
+    });
+
+  program
     .command('serve')
     .description('start the HTTP API')
     .option('--port <port>', 'HTTP port', parseIntOption)
@@ -247,4 +309,55 @@ export function createProgram(deps: CliDeps): Command {
     });
 
   return program;
+}
+
+const AUDIT_COLUMNS = [
+  'time',
+  'service',
+  'operation',
+  'resource',
+  'principal',
+  'authType',
+  'sourceIp',
+] as const;
+
+function renderAudit(
+  events: AuditEvent[],
+  format: 'text' | 'json' | 'csv',
+): string {
+  if (format === 'json') {
+    return JSON.stringify(events, null, 2);
+  }
+  if (format === 'csv') {
+    const escapeCsv = (value: string | undefined): string =>
+      value === undefined
+        ? ''
+        : /[",\n]/.test(value)
+          ? `"${value.replaceAll('"', '""')}"`
+          : value;
+    const header = AUDIT_COLUMNS.join(',');
+    const rows = events.map((event) =>
+      AUDIT_COLUMNS.map((column) => escapeCsv(event[column])).join(','),
+    );
+    return [header, ...rows].join('\n');
+  }
+  if (events.length === 0) {
+    return 'no audit events matched';
+  }
+  const rows = events.map((event) =>
+    [
+      event.time,
+      event.service,
+      event.operation,
+      event.resource ?? '-',
+      event.principal ?? '-',
+      event.authType ?? '-',
+      event.sourceIp ?? '-',
+    ].join('  '),
+  );
+  return [
+    AUDIT_COLUMNS.join('  '),
+    ...rows,
+    `\n${events.length} event(s)`,
+  ].join('\n');
 }

@@ -40,15 +40,19 @@ Use cases orchestrate ports; they never import an SDK.
   format → assemble filename (`cloudcost-<provider>-<from>_<to>.<ext>`).
 - **`SendReport`** — validate recipients → generate → notify with attachment
   and a top-5 summary in the body.
+- **`SearchAudit`** — parse instants → require a compartment → delegate to the
+  audit port. A `warning` on the result means pagination stopped early and the
+  events returned are a prefix, not the full answer.
 
 Ports (interfaces): `CostProvider`, `ReportExporter`, `Notifier`,
-`CachePort`, `SchedulerPort`.
+`CachePort`, `SchedulerPort`, `StoragePort`, `AuditPort`.
 
 ### Infrastructure (`src/infrastructure/`)
 
 | Adapter | Port | Notes |
 |---|---|---|
 | `providers/oci` | `CostProvider` | Usage API `requestSummarizedUsages` (`DAILY` + `COST`, grouped by `service`,`region`); midnight UTC bounds; malformed rows dropped |
+| `providers/oci/oci-audit-provider` | `AuditPort` | Audit `listEvents` (100/page); operation/service/principal filtered client-side; instants shifted for the SDK's local-time serialiser; keeps events collected before a mid-pagination failure |
 | `providers/aws` | `CostProvider` | Cost Explorer `GetCostAndUsage` (`UnblendedCost`, dimensions `SERVICE` + `REGION`) |
 | `exporters/*` | `ReportExporter` | json / csv (`csv-stringify`) / xlsx (`exceljs`, Summary + Records sheets) / zip (`jszip`, all three bundled) |
 | `mailer/smtp-mailer` | `Notifier` | nodemailer with an injectable transport |
@@ -57,6 +61,7 @@ Ports (interfaces): `CostProvider`, `ReportExporter`, `Notifier`,
 
 `providers/registry.ts` is the only file that touches credentials: it builds
 each provider, skipping (with a warning) any that cannot be constructed.
+Audit is built the same way and is `null` when credentials are absent.
 
 ### Interfaces (`src/interfaces/`)
 

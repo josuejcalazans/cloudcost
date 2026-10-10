@@ -1,4 +1,5 @@
 import { S3Client } from '@aws-sdk/client-s3';
+import type { AuditPort } from './application/ports/audit.ts';
 import type { CachePort } from './application/ports/cache.ts';
 import type { CostProvider } from './application/ports/cost-provider.ts';
 import type {
@@ -9,6 +10,7 @@ import type { Notifier } from './application/ports/notifier.ts';
 import type { StoragePort } from './application/ports/storage.ts';
 import { GenerateReport } from './application/use-cases/generate-report.ts';
 import { GetCosts } from './application/use-cases/get-costs.ts';
+import { SearchAudit } from './application/use-cases/search-audit.ts';
 import { SendReport } from './application/use-cases/send-report.ts';
 import { UploadReport } from './application/use-cases/upload-report.ts';
 import { type AppConfig, loadConfig } from './config.ts';
@@ -16,7 +18,10 @@ import type { ProviderId } from './domain/entities/cost-record.ts';
 import { MemoryCache } from './infrastructure/cache/memory-cache.ts';
 import { createDefaultExporters } from './infrastructure/exporters/registry.ts';
 import { SmtpMailer } from './infrastructure/mailer/smtp-mailer.ts';
-import { buildProviders } from './infrastructure/providers/registry.ts';
+import {
+  buildAuditProvider,
+  buildProviders,
+} from './infrastructure/providers/registry.ts';
 import { NodeCronScheduler } from './infrastructure/scheduler/node-cron-scheduler.ts';
 import {
   isObjectStorageConfigured,
@@ -31,6 +36,8 @@ export interface CreateCloudCostOptions {
   exporters?: Map<ReportFormat, ReportExporter>;
   notifier?: Notifier;
   storage?: StoragePort | null;
+  /** Audit adapter; `null` disables the `audit` command. */
+  audit?: AuditPort | null;
 }
 
 function buildStorage(config: AppConfig): OciObjectStorage | null {
@@ -56,6 +63,8 @@ export function createCloudCost(options: CreateCloudCostOptions = {}) {
   const notifier = options.notifier ?? SmtpMailer.fromConfig(config.smtp);
   const storage =
     options.storage !== undefined ? options.storage : buildStorage(config);
+  const audit =
+    options.audit !== undefined ? options.audit : buildAuditProvider();
 
   const getCosts = new GetCosts(
     providers,
@@ -68,6 +77,7 @@ export function createCloudCost(options: CreateCloudCostOptions = {}) {
     recipients: config.mail.recipients,
   });
   const uploadReport = new UploadReport(generateReport, storage);
+  const searchAudit = audit === null ? null : new SearchAudit(audit);
   const scheduler = new NodeCronScheduler();
 
   return {
@@ -77,10 +87,12 @@ export function createCloudCost(options: CreateCloudCostOptions = {}) {
     exporters,
     notifier,
     storage,
+    audit,
     getCosts,
     generateReport,
     sendReport,
     uploadReport,
+    searchAudit,
     scheduler,
   };
 }
@@ -95,6 +107,7 @@ export {
   ProviderNotConfiguredError,
   UnsupportedFormatError,
 } from './application/errors.ts';
+export type { AuditPort, AuditQuery } from './application/ports/audit.ts';
 export type { CachePort } from './application/ports/cache.ts';
 export type {
   CostProvider,
@@ -118,6 +131,11 @@ export {
 } from './application/use-cases/generate-report.ts';
 export { GetCosts } from './application/use-cases/get-costs.ts';
 export {
+  SearchAudit,
+  type SearchAuditInput,
+  type SearchAuditResult,
+} from './application/use-cases/search-audit.ts';
+export {
   SendReport,
   type SendReportInput,
 } from './application/use-cases/send-report.ts';
@@ -135,6 +153,10 @@ export {
   type ReportGroup,
 } from './domain/aggregates/cost-report.ts';
 export {
+  type AuditEvent,
+  createAuditEvent,
+} from './domain/entities/audit-event.ts';
+export {
   type CostRecord,
   createCostRecord,
   isProviderId,
@@ -148,7 +170,10 @@ export { MemoryCache } from './infrastructure/cache/memory-cache.ts';
 export { PdfExporter } from './infrastructure/exporters/pdf-exporter.ts';
 export { createDefaultExporters } from './infrastructure/exporters/registry.ts';
 export { SmtpMailer } from './infrastructure/mailer/smtp-mailer.ts';
-export { buildProviders } from './infrastructure/providers/registry.ts';
+export {
+  buildAuditProvider,
+  buildProviders,
+} from './infrastructure/providers/registry.ts';
 export { NodeCronScheduler } from './infrastructure/scheduler/node-cron-scheduler.ts';
 export {
   isObjectStorageConfigured,

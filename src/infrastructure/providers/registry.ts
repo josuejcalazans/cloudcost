@@ -1,11 +1,14 @@
 import { CostExplorerClient } from '@aws-sdk/client-cost-explorer';
+import { AuditClient } from 'oci-audit';
 import {
+  type AuthenticationDetailsProvider,
   ConfigFileAuthenticationDetailsProvider,
   ConfigFileReader,
   Region,
   SimpleAuthenticationDetailsProvider,
 } from 'oci-common';
 import { UsageapiClient } from 'oci-usageapi';
+import type { AuditPort } from '../../application/ports/audit.ts';
 import type { CostProvider } from '../../application/ports/cost-provider.ts';
 import type { AppConfig } from '../../config.ts';
 import type { ProviderId } from '../../domain/entities/cost-record.ts';
@@ -13,6 +16,10 @@ import {
   AwsCostProvider,
   type CostExplorerLike,
 } from './aws/aws-cost-provider.ts';
+import {
+  type AuditClientLike,
+  OciAuditProvider,
+} from './oci/oci-audit-provider.ts';
 import { resolveOciCredentials } from './oci/oci-auth.ts';
 import {
   OciCostProvider,
@@ -25,7 +32,21 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function createOciProvider(env: Env): CostProvider {
+function setRegion<T extends { region?: unknown }>(
+  client: T,
+  auth: AuthenticationDetailsProvider,
+): T {
+  const regionProvider = auth as { getRegion?: () => unknown };
+  if (typeof regionProvider.getRegion === 'function') {
+    client.region = regionProvider.getRegion();
+  }
+  return client;
+}
+
+function createOciAuth(env: Env): {
+  auth: AuthenticationDetailsProvider;
+  tenancy: string;
+} {
   const credentials = resolveOciCredentials(env);
 
   const auth =
@@ -54,13 +75,25 @@ function createOciProvider(env: Env): CostProvider {
     );
   }
 
-  const client = new UsageapiClient({ authenticationDetailsProvider: auth });
-  const regionProvider = auth as { getRegion?: () => unknown };
-  if (typeof regionProvider.getRegion === 'function') {
-    (client as { region?: unknown }).region = regionProvider.getRegion();
-  }
+  return { auth, tenancy };
+}
 
+function createOciProvider(env: Env): CostProvider {
+  const { auth, tenancy } = createOciAuth(env);
+  const client = setRegion(
+    new UsageapiClient({ authenticationDetailsProvider: auth }),
+    auth,
+  );
   return new OciCostProvider(client as unknown as UsageApiClientLike, tenancy);
+}
+
+function createOciAuditProvider(env: Env): AuditPort {
+  const { auth } = createOciAuth(env);
+  const client = setRegion(
+    new AuditClient({ authenticationDetailsProvider: auth }),
+    auth,
+  );
+  return new OciAuditProvider(client as unknown as AuditClientLike);
 }
 
 function createAwsProvider(config: AppConfig['aws']): CostProvider {
@@ -92,4 +125,19 @@ export function buildProviders(
   }
 
   return providers;
+}
+
+/**
+ * Builds the OCI audit adapter. Audit uses different credentials from
+ * billing only in the sense that it needs `read audit-event`; when the
+ * caller lacks that permission the returned port rejects at search time
+ * with the OCI error rather than silently returning nothing.
+ */
+export function buildAuditProvider(env: Env = process.env): AuditPort | null {
+  try {
+    return createOciAuditProvider(env);
+  } catch (error) {
+    console.warn(`[cloudcost] audit disabled: ${errorMessage(error)}`);
+    return null;
+  }
 }

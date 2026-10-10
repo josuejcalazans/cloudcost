@@ -44,13 +44,29 @@ function buildDeps() {
     scheduleReports: vi.fn(),
     writeFile: vi.fn(),
     print: vi.fn(),
+    warn: vi.fn(),
     printBuffer: vi.fn(),
+    searchAudit: vi.fn(async () => ({
+      events: [
+        {
+          time: '2026-10-10T04:11:22.000Z',
+          service: 'ObjectStorage',
+          operation: 'GetObject',
+          resource: 'bucket-oci-springbot/report.pdf',
+          principal: 'svc-extractor',
+          authType: 'Anonymous',
+          sourceIp: '203.0.113.7',
+        },
+      ],
+      truncated: false,
+    })),
   };
   return {
     deps,
     generateReport,
     sendReportEmail,
     uploadReport,
+    searchAudit: deps.searchAudit,
     scheduleReports: deps.scheduleReports,
     startServer: deps.startServer,
   };
@@ -322,5 +338,95 @@ describe('cloudcost CLI', () => {
     ]);
 
     expect(startServer).toHaveBeenCalledWith(4100);
+  });
+
+  it('searches the audit trail with the given filters', async () => {
+    const { deps, searchAudit } = buildDeps();
+
+    await createProgram(deps).parseAsync([
+      'node',
+      'cloudcost',
+      'audit',
+      '--from',
+      '2026-10-10T04:00:00Z',
+      '--to',
+      '2026-10-10T06:00:00Z',
+      '--operation',
+      'GetObject',
+      '--service',
+      'ObjectStorage',
+      '--format',
+      'json',
+    ]);
+
+    expect(searchAudit).toHaveBeenCalledWith({
+      from: '2026-10-10T04:00:00Z',
+      to: '2026-10-10T06:00:00Z',
+      operation: 'GetObject',
+      service: 'ObjectStorage',
+      limit: 1000,
+    });
+  });
+
+  it('renders audit events as csv with quoted fields', async () => {
+    const { deps, searchAudit } = buildDeps();
+    vi.mocked(searchAudit).mockResolvedValueOnce({
+      events: [
+        {
+          time: '2026-10-10T04:11:22.000Z',
+          service: 'ObjectStorage',
+          operation: 'GetObject',
+          resource: 'bucket, with comma',
+          principal: 'svc "extractor"',
+        },
+      ],
+      truncated: false,
+    });
+
+    await createProgram(deps).parseAsync([
+      'node',
+      'cloudcost',
+      'audit',
+      '--from',
+      '2026-10-10',
+      '--to',
+      '2026-10-11',
+      '--format',
+      'csv',
+    ]);
+
+    expect(deps.print).toHaveBeenCalledWith(
+      expect.stringContaining('"bucket, with comma"'),
+    );
+    expect(deps.print).toHaveBeenCalledWith(
+      expect.stringContaining('"svc ""extractor"""'),
+    );
+  });
+
+  it('warns on stderr when the audit row limit truncates the result', async () => {
+    const { deps, searchAudit } = buildDeps();
+    vi.mocked(searchAudit).mockResolvedValueOnce({
+      events: [],
+      truncated: true,
+    });
+
+    await createProgram(deps).parseAsync([
+      'node',
+      'cloudcost',
+      'audit',
+      '--from',
+      '2026-10-10',
+      '--to',
+      '2026-10-11',
+      '--limit',
+      '5',
+    ]);
+
+    expect(deps.warn).toHaveBeenCalledWith(
+      expect.stringContaining('hit the row limit (5)'),
+    );
+    expect(deps.warn).toHaveBeenCalledWith(
+      expect.stringContaining('anonymous reads are not audited'),
+    );
   });
 });
